@@ -1,0 +1,63 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isValidImageUpload() {
+      return request.resource.size < 10 * 1024 * 1024 // 10MB max
+        && request.resource.contentType.matches('image/.*');
+    }
+    
+    function isValidDocumentUpload() {
+      return request.resource.size < 20 * 1024 * 1024 // 20MB max
+        && request.resource.contentType.matches('application/pdf|image/.*');
+    }
+
+    // Waste report photos
+    match /waste-reports/{reportId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImageUpload();
+      allow delete: if isAuthenticated();
+    }
+
+    // Waste intake photos
+    match /waste-intakes/{intakeId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImageUpload();
+      allow delete: if isAuthenticated();
+    }
+
+    // Waste processing photos
+    match /waste-processing/{processingId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImageUpload();
+      allow delete: if isAuthenticated();
+    }
+
+    // Delivery proof photos
+    match /deliveries/{deliveryId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImageUpload();
+      allow delete: if isAuthenticated();
+    }
+
+    // Certificates and documents
+    match /certificates/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidDocumentUpload();
+      allow delete: if isAuthenticated();
+    }
+
+    // User profile photos
+    match /profiles/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId && isValidImageUpload();
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}
