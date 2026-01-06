@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,7 +14,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { LogOut, Settings } from 'lucide-react';
-import NotificationBell from '@/components/notification-bell';
 
 export function Header() {
   const { logout, user } = useAuth();

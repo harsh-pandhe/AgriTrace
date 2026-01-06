@@ -1,6 +1,6 @@
 'use client';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { getAuth, Auth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
@@ -23,22 +23,33 @@ if (typeof window !== 'undefined') {
   // 1. Initialize Firebase App
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-  // 2. Initialize Auth
+  // 2. Initialize Auth with persistence
   auth = getAuth(app);
+
+  // Enable persistence - this is automatic in web SDK by default
+  // but we'll explicitly set it to LOCAL for clarity
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      console.log('Firebase: Persistence enabled');
+    })
+    .catch((error) => {
+      console.warn('Firebase: Failed to set persistence:', error);
+    });
 
   // 3. Initialize Storage
   storage = getStorage(app);
 
   // 4. Initialize Firestore
-  // Use getFirestore() which handles both first-time initialization and
-  // returning existing instances without conflicts
   db = getFirestore(app);
+
+  console.log('Firebase: Initialized in browser');
 } else {
   // Fallback for SSR (Server Side Rendering)
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
+  console.log('Firebase: Initialized for SSR');
 }
 
 export { app, auth, db, storage };

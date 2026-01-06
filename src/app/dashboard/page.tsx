@@ -42,13 +42,15 @@ export default function DashboardPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [posting, setPosting] = useState(false);
   const [selectedTab, setSelectedTab] = useState('purchases');
-  const [stats, setStats] = useState<CardStats>({
+  const [stats] = useState<CardStats>({
     totalSales: 12450,
     activeListings: 4,
     inTransit: 2,
     impact: 850,
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orders, setOrders] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sales, setSales] = useState<any[]>([]);
 
   const { createListing, listingsQuery, ordersQueryForBuyer, ordersQueryForSeller } = useFirebase();
@@ -115,7 +117,6 @@ export default function DashboardPage() {
         category: formData.get('category') as string,
         sellerId: user?.uid || '',
         sellerEmail: user?.email || '',
-        createdAt: new Date(),
       });
 
       toast({

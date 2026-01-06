@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useFirebase } from '@/hooks/use-firebase';
+import { getDocs } from 'firebase/firestore';
 import { WasteIntakeForm } from '@/components/recycling/waste-intake-form';
 import { WasteProcessingForm } from '@/components/recycling/waste-processing-form';
 import {
@@ -40,11 +41,13 @@ import { Button } from '@/components/ui/button';
 export default function RecyclerDashboard() {
   const router = useRouter();
   const { user, userRole } = useAuth();
-  const { getRecyclerDashboardStats, getWasteIntakeRecords } =
+  const { getRecyclerDashboardStats, getWasteIntakeRecords, getProcessingRecords } =
     useFirebase();
 
   const [stats, setStats] = useState<any>(null);
   const [intakeRecords, setIntakeRecords] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [processingRecords, setProcessingRecords] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

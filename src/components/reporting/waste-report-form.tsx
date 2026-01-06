@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -262,8 +261,8 @@ export function WasteReportForm() {
           type="submit"
           disabled={form.formState.isSubmitting || photos.length === 0}
           className={`w-full py-3 px-6 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${photos.length === 0
-              ? 'bg-slate-300 cursor-not-allowed'
-              : 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 shadow-lg shadow-emerald-200 hover:shadow-emerald-300 active:scale-95'
+            ? 'bg-slate-300 cursor-not-allowed'
+            : 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 shadow-lg shadow-emerald-200 hover:shadow-emerald-300 active:scale-95'
             }`}
           aria-busy={form.formState.isSubmitting}
         >

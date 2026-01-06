@@ -42,30 +42,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    // Log to verify persistence is being checked
+    console.log('AuthProvider: Setting up auth state listener');
+
+    // onAuthStateChanged will automatically check for persisted sessions
+    // and trigger whenever auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data() as User;
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            role: userData.role,
-            name: userData.name,
-            photoURL: firebaseUser.photoURL
-          });
+      console.log('AuthProvider: Auth state changed', { user: firebaseUser?.uid, email: firebaseUser?.email });
+
+      try {
+        if (firebaseUser) {
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const userData = userDoc.data() as User;
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              role: userData.role,
+              name: userData.name,
+              photoURL: firebaseUser.photoURL
+            });
+          } else {
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              photoURL: firebaseUser.photoURL
+            });
+          }
         } else {
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            photoURL: firebaseUser.photoURL
-          });
+          setUser(null);
         }
-      } else {
+      } catch (error) {
+        console.error('Auth state change error:', error);
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -128,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resendVerification,
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

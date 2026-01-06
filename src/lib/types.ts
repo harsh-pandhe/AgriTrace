@@ -140,9 +140,13 @@ export interface Listing {
   id?: string;
   title: string;
   price: number;
-  location: string;
+  quantity?: number;
+  location?: string;
   category: string;
-  ownerId: string;
+  ownerId?: string;
+  sellerId?: string;
+  sellerEmail?: string;
+  description?: string;
   img?: string;
   createdAt?: Timestamp | Date;
 }

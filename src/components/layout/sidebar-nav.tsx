@@ -50,16 +50,6 @@ export function SidebarNav() {
     return 'U';
   };
 
-  const getRoleLabel = () => {
-    const labels: Record<string, string> = {
-      FARMER: 'Farmer Account',
-      AGENT: 'Collection Agent Account',
-      RECYCLER: 'Recycler Account',
-      ADMIN: 'Admin Account',
-    };
-    return labels[role] || 'User Account';
-  };
-
   return (
     <div className="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-40 flex flex-col">
       {/* Logo Section */}
