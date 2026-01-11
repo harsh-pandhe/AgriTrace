@@ -8,6 +8,9 @@ import NextTopLoader from 'nextjs-toploader';
 export const metadata: Metadata = {
   title: 'AgriTrace Connect',
   description: 'A digital platform to manage agricultural waste.',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

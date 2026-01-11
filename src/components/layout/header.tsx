@@ -12,12 +12,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/context/auth-context';
-import { useRouter } from 'next/navigation';
 import { LogOut, Settings } from 'lucide-react';
+import NotificationBell from '@/components/notification-bell';
 
 export function Header() {
   const { logout, user } = useAuth();
-  const router = useRouter();
 
   // Get user initials from email or name
   const getUserInitials = () => {
@@ -32,7 +31,6 @@ export function Header() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
   };
 
   return (
@@ -46,12 +44,7 @@ export function Header() {
 
       <div className="flex items-center gap-3 sm:gap-6">
         {/* Notifications */}
-        <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 1118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
+        <NotificationBell />
 
         {/* User Avatar with Dropdown */}
         <DropdownMenu>
@@ -77,7 +70,7 @@ export function Header() {
                 {user?.email}
               </div>
               <div className="text-xs text-slate-600">
-                {user?.role === 'FARMER' ? 'Farmer Account' : user?.role === 'AGENT' ? 'Collection Agent' : user?.role === 'RECYCLER' ? 'Recycler Account' : 'Admin Account'}
+                {user?.role === 'FARMER' ? 'Farmer Account' : user?.role === 'AGENT' ? 'Collection Agent' : 'Admin Account'}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

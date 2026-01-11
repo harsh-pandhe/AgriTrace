@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Leaf, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Leaf, AlertCircle, Eye, EyeOff, ShieldCheck, Sparkles, Trees, LogIn } from 'lucide-react';
+import { getUnreadCount, getUserNotifications } from '@/lib/notification-service';
+import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 
@@ -40,6 +42,33 @@ export default function LoginPage() {
         title: 'Login Successful',
         description: 'Welcome back!',
       });
+
+      // Show notification summary after successful login
+      const uid = auth.currentUser?.uid;
+      if (uid) {
+        try {
+          const unread = await getUnreadCount(uid);
+          if (unread > 0) {
+            toast({
+              title: 'You have notifications',
+              description: `${unread} unread ${unread === 1 ? 'item' : 'items'}. Check the bell at the top right.`,
+            });
+
+            // Show the latest unread notification as a preview toast
+            const latestUnread = await getUserNotifications(uid, true, 1);
+            if (latestUnread && latestUnread.length > 0) {
+              const n = latestUnread[0] as any;
+              toast({
+                title: n.title || 'New update',
+                description: n.message || 'You have a new notification.',
+              });
+            }
+          }
+        } catch (notifErr) {
+          // Non-blocking: just log
+          console.warn('Notification fetch failed:', notifErr);
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
 
@@ -54,152 +83,179 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-red-400 dark:bg-red-500 rounded-bl-3xl -z-10" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-300 dark:bg-yellow-600 rounded-tr-3xl -z-10" />
+    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 selection:bg-emerald-500 selection:text-white">
+      {/* Dynamic Background Glow */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-0 opacity-30 blur-[120px] transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(600px circle at ${typeof window !== 'undefined' ? window.innerWidth / 2 : 0}px ${typeof window !== 'undefined' ? window.innerHeight / 2 : 0}px, rgba(16, 185, 129, 0.15), transparent 80%)`
+        }}
+      />
 
-      {/* Left Panel - Welcome Section */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-teal-500 to-green-600 dark:from-teal-600 dark:to-green-700 items-center justify-center p-8 relative overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-10 left-10 w-32 h-32 border border-white rounded-full" />
-          <div className="absolute bottom-20 right-20 w-40 h-40 border border-white rounded-full" />
-          <div className="absolute top-1/2 right-1/4 w-24 h-24 border border-white rounded-full" />
-        </div>
-
-        <div className="relative z-10 text-center text-white max-w-sm flex flex-col items-center">
-          {/* Logo */}
-          <div className="mb-12 flex justify-center">
-            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-4 shadow-lg">
-              <Leaf className="h-10 w-10 text-white" />
+      {/* --- Navigation --- */}
+      <nav className="fixed top-0 z-[100] w-full bg-white/70 backdrop-blur-2xl py-3 border-b border-slate-100 transition-all duration-500">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 md:px-12">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-2xl shadow-emerald-500/20">
+              <Leaf className="h-6 w-6 text-emerald-400" />
             </div>
-          </div>
-
-          <h1 className="text-5xl font-bold mb-6 font-headline leading-tight">Welcome Back!</h1>
-          <p className="text-lg text-white/95 mb-12 leading-relaxed font-light">
-            To keep connected with us please login with your personal info
-          </p>
-
-          <Link href="/signup" className="w-full max-w-xs">
-            <Button
-              className="w-full bg-white/90 hover:bg-white text-teal-600 font-bold text-lg py-3 rounded-full transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
-            >
-              SIGN UP
-            </Button>
+            <span className="text-2xl font-[1000] tracking-tighter uppercase italic">
+              Agri<span className="text-emerald-500 not-italic">Trace</span>
+            </span>
           </Link>
-        </div>
-      </div>
 
-      {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8">
-        <div className="w-full max-w-sm">
-          {/* Mobile Logo */}
-          <div className="lg:hidden mb-8 flex justify-center">
-            <div className="bg-gradient-to-br from-teal-500 to-green-600 rounded-lg p-3">
-              <Leaf className="h-8 w-8 text-white" />
-            </div>
+          <div className="flex items-center gap-4">
+            <Link href="/signup" className="text-sm font-black uppercase tracking-widest text-slate-600 hover:text-emerald-600 transition-colors">
+              Create Account
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* --- Main Content --- */}
+      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden pt-20 pb-12">
+        <div className="mx-auto max-w-3xl px-6 text-center relative z-10 w-full">
+          {/* Badge */}
+          <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-emerald-100 bg-emerald-50/50 px-6 py-2 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-sm text-emerald-800">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            Secure Authentication
           </div>
 
           {/* Heading */}
-          <h2 className="text-4xl font-bold text-teal-600 dark:text-teal-400 mb-8 text-center font-headline">
-            Login
-          </h2>
+          <h1 className="text-4xl font-[1000] leading-[0.95] tracking-tighter text-slate-900 sm:text-5xl lg:text-6xl mb-4">
+            Welcome to <span className="text-emerald-600">AgriTrace</span>
+          </h1>
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-4">
-            {/* Email field */}
-            <div>
-              <div className="relative group">
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder:text-gray-500 transition-all focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 dark:focus:border-teal-400"
-                />
-                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-teal-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-            </div>
+          <p className="text-lg text-slate-600 mb-12 max-w-2xl mx-auto">
+            Sign in to access your role-based dashboard and manage waste tracking across the entire supply chain.
+          </p>
 
-            {/* Password field */}
-            <div>
-              <div className="relative group">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-11 py-3 bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder:text-gray-500 transition-all focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 dark:focus:border-teal-400"
-                />
-                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-teal-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors p-1"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Error message */}
-            {error && (
-              <div className="flex items-start gap-3 rounded-lg bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 text-sm text-red-700 dark:text-red-400">
-                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <span className="font-medium">{error}</span>
-              </div>
-            )}
-
-            {/* Forgot password link */}
-            <div className="text-right">
-              <Link
-                href="/reset-password"
-                className="text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            {/* Login button */}
-            <Button
-              type="submit"
-              disabled={loadingLocal}
-              className="w-full py-3 text-lg font-bold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-green-600 hover:from-teal-600 hover:via-teal-700 hover:to-green-700 dark:from-teal-600 dark:to-green-700 rounded-full transition-all shadow-lg hover:shadow-2xl hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:shadow-lg"
-            >
-              {loadingLocal ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  <span>Signing in...</span>
+          {/* Form Container */}
+          <div className="w-full max-w-md mx-auto">
+            <div className="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-2xl">
+              <form onSubmit={handleLogin} className="space-y-5">
+                {/* Email Input */}
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-bold text-slate-700">Email Address</label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loadingLocal}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all disabled:opacity-60"
+                  />
                 </div>
-              ) : (
-                'SIGN IN'
-              )}
-            </Button>
-          </form>
 
-          {/* Sign up link */}
-          <div className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
-            Don&apos;t have an account?{' '}
-            <Link
-              href="/signup"
-              className="font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors underline underline-offset-2"
-            >
-              Create one
-            </Link>
+                {/* Password Input */}
+                <div className="space-y-2">
+                  <label htmlFor="password" className="text-sm font-bold text-slate-700">Password</label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••••"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loadingLocal}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all disabled:opacity-60"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={loadingLocal}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors disabled:opacity-60"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Error Alert */}
+                {error && (
+                  <div className="flex items-start gap-3 rounded-xl bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm font-semibold">
+                    <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={loadingLocal}
+                  className="w-full h-12 rounded-xl bg-slate-900 text-white font-black uppercase tracking-widest hover:bg-emerald-600 transition-all hover:-translate-y-1 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loadingLocal ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      <span>Signing in...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2">
+                      <LogIn className="h-5 w-5" />
+                      <span>Sign In</span>
+                    </div>
+                  )}
+                </Button>
+              </form>
+
+              {/* Divider */}
+              <div className="my-6 flex items-center gap-3">
+                <div className="h-px flex-1 bg-slate-200" />
+                <span className="text-xs font-bold text-slate-400 uppercase">New to agritrace?</span>
+                <div className="h-px flex-1 bg-slate-200" />
+              </div>
+
+              {/* Signup Link */}
+              <Link href="/signup" className="block text-center py-3 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-all font-bold text-emerald-700">
+                Create an account
+              </Link>
+
+              {/* Security Info */}
+              <div className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                <span className="font-bold">Encrypted • Multi-factor ready</span>
+              </div>
+            </div>
           </div>
+
+          {/* Features at bottom */}
+          <div className="mt-16 grid gap-4 md:grid-cols-3 max-w-2xl mx-auto">
+            {[
+              { icon: Sparkles, title: 'Fast Access', desc: 'Instant dashboard load' },
+              { icon: Trees, title: 'Live Updates', desc: 'Real-time notifications' },
+              { icon: ShieldCheck, title: 'Enterprise Security', desc: 'Role-based controls' }
+            ].map((item) => (
+              <div key={item.title} className="rounded-2xl bg-white p-5 shadow-lg ring-1 ring-emerald-100">
+                <div className="mb-3 inline-flex items-center justify-center rounded-xl bg-emerald-100 p-3 text-emerald-700">
+                  <item.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-sm">{item.title}</h3>
+                <p className="text-xs text-slate-600 mt-1">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer strip */}
+      <div className="relative z-10 border-t border-slate-200 bg-white/50 backdrop-blur py-4">
+        <div className="mx-auto max-w-3xl px-6 flex flex-wrap justify-center gap-4 text-xs text-slate-600 font-bold uppercase tracking-widest">
+          <span className="flex items-center gap-2 rounded-full bg-white px-3 py-2 ring-1 ring-emerald-100">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            99.9% uptime
+          </span>
+          <span className="flex items-center gap-2 rounded-full bg-white px-3 py-2 ring-1 ring-emerald-100">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Role-based security
+          </span>
+          <span className="flex items-center gap-2 rounded-full bg-white px-3 py-2 ring-1 ring-emerald-100">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Audit-ready
+          </span>
         </div>
       </div>
     </div>

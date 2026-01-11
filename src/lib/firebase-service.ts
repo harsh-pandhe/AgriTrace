@@ -1,6 +1,6 @@
-import { collection, addDoc, serverTimestamp, doc, updateDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, query, where, orderBy, getCountFromServer } from 'firebase/firestore';
 import { db } from './firebase';
-import type { WasteReport, WasteReportStatus, Listing, Order } from './types';
+import type { WasteReport, WasteReportStatus, Listing, Order, ListingStatus } from './types';
 
 export async function createWasteReport(values: Omit<Partial<WasteReport>, 'id' | 'reportedAt' | 'lastUpdate' | 'status'> & { farmerId: string }) {
   const payload = {
@@ -28,11 +28,12 @@ export function reportsQueryForUser(userId: string, role?: string) {
 }
 
 // Listings helpers
-export async function createListing(data: Omit<Listing, 'id' | 'createdAt'>): Promise<string> {
+export async function createListing(data: Omit<Listing, 'id' | 'createdAt' | 'updatedAt' | 'status'>): Promise<string> {
   const payload: Partial<Listing> = {
     ...data,
-    // serverTimestamp returns a FieldValue; cast to any for Firestore write
+    status: 'OPEN' as ListingStatus,
     createdAt: serverTimestamp() as any,
+    updatedAt: serverTimestamp() as any,
   };
   const ref = await addDoc(collection(db, 'listings'), payload as any);
   return ref.id;
@@ -41,6 +42,103 @@ export async function createListing(data: Omit<Listing, 'id' | 'createdAt'>): Pr
 export function listingsQuery() {
   // For now, show all listings ordered by newest first. We can add filters for role/user later.
   return query(collection(db, 'listings'), orderBy('createdAt', 'desc'));
+}
+
+export function openListingsQuery() {
+  // Get all open listings for agents to claim
+  return query(collection(db, 'listings'), where('status', '==', 'OPEN'), orderBy('createdAt', 'desc'));
+}
+
+export function agentListingsQuery(agentId: string) {
+  // Get listings assigned to this agent
+  return query(collection(db, 'listings'), where('assignedAgentId', '==', agentId), orderBy('updatedAt', 'desc'));
+}
+
+export async function claimListing(listingId: string, agentId: string, agentEmail: string): Promise<void> {
+  const ref = doc(db, 'listings', listingId);
+  await updateDoc(ref, {
+    status: 'ASSIGNED' as ListingStatus,
+    assignedAgentId: agentId,
+    assignedAgentEmail: agentEmail,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function startPickup(listingId: string): Promise<void> {
+  const ref = doc(db, 'listings', listingId);
+  await updateDoc(ref, {
+    status: 'IN_TRANSIT' as ListingStatus,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function markDelivered(listingId: string): Promise<void> {
+  const ref = doc(db, 'listings', listingId);
+  await updateDoc(ref, {
+    status: 'DELIVERED' as ListingStatus,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function cancelListing(listingId: string): Promise<void> {
+  const ref = doc(db, 'listings', listingId);
+  await updateDoc(ref, {
+    status: 'CANCELLED' as ListingStatus,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+// Admin stats helpers
+export async function getAdminStats() {
+  try {
+    // Get user counts by role
+    const usersRef = collection(db, 'users');
+    const farmersQuery = query(usersRef, where('role', '==', 'FARMER'));
+    const agentsQuery = query(usersRef, where('role', '==', 'AGENT'));
+    const adminsQuery = query(usersRef, where('role', '==', 'ADMIN'));
+    
+    const [farmersSnap, agentsSnap, adminsSnap] = await Promise.all([
+      getCountFromServer(farmersQuery),
+      getCountFromServer(agentsQuery),
+      getCountFromServer(adminsQuery),
+    ]);
+
+    // Get listing counts by status
+    const listingsRef = collection(db, 'listings');
+    const openQuery = query(listingsRef, where('status', '==', 'OPEN'));
+    const assignedQuery = query(listingsRef, where('status', '==', 'ASSIGNED'));
+    const inTransitQuery = query(listingsRef, where('status', '==', 'IN_TRANSIT'));
+    const deliveredQuery = query(listingsRef, where('status', '==', 'DELIVERED'));
+
+    const [openSnap, assignedSnap, inTransitSnap, deliveredSnap] = await Promise.all([
+      getCountFromServer(openQuery),
+      getCountFromServer(assignedQuery),
+      getCountFromServer(inTransitQuery),
+      getCountFromServer(deliveredQuery),
+    ]);
+
+    return {
+      users: {
+        farmers: farmersSnap.data().count,
+        agents: agentsSnap.data().count,
+        admins: adminsSnap.data().count,
+        total: farmersSnap.data().count + agentsSnap.data().count + adminsSnap.data().count,
+      },
+      listings: {
+        open: openSnap.data().count,
+        assigned: assignedSnap.data().count,
+        inTransit: inTransitSnap.data().count,
+        delivered: deliveredSnap.data().count,
+        total: openSnap.data().count + assignedSnap.data().count + inTransitSnap.data().count + deliveredSnap.data().count,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching admin stats:', error);
+    return {
+      users: { farmers: 0, agents: 0, admins: 0, total: 0 },
+      listings: { open: 0, assigned: 0, inTransit: 0, delivered: 0, total: 0 },
+    };
+  }
 }
 
 export async function createOrder(data: Omit<Order, 'id' | 'createdAt' | 'status'>): Promise<string> {

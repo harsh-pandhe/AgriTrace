@@ -27,10 +27,9 @@ A modern, full-stack web application for tracking agricultural waste and connect
 
 ### 🔑 Core Features
 - **User Authentication** - Firebase Auth with email/password and password reset
-- **Role-Based Access Control** - Farmer, Agent, Recycler, and Admin roles
+- **Role-Based Access Control** - Farmer and Agent roles with Admin oversight
 - **Waste Tracking Dashboard** - Real-time waste reporting and tracking
-- **Recycling Management** - Organize and manage waste collection
-- **AI-Powered Analysis** - Integration with Google Genkit for waste analysis
+- **Collection Management** - Organize and manage waste collection
 - **Payment Integration** - Razorpay integration for transactions
 
 ### 📊 User Dashboards
@@ -40,9 +39,8 @@ A modern, full-stack web application for tracking agricultural waste and connect
 
 ### 🎨 UI/UX
 - **Modern, Responsive Design** - Works seamlessly on desktop, tablet, and mobile
-- **Dark Mode Support** - Full light/dark theme toggle
 - **Beautiful Components** - Radix UI components with custom styling
-- **Smooth Animations** - Framer Motion for fluid interactions
+- **Smooth Animations** - Fluid interactions throughout
 
 ---
 
@@ -54,7 +52,6 @@ A modern, full-stack web application for tracking agricultural waste and connect
 - **Styling:** Tailwind CSS 3.0
 - **UI Components:** Radix UI
 - **Forms:** React Hook Form + Zod validation
-- **Animations:** Framer Motion
 - **Icons:** Lucide React
 - **Charts:** Recharts
 
@@ -63,7 +60,6 @@ A modern, full-stack web application for tracking agricultural waste and connect
 - **Database:** Firebase Firestore (NoSQL)
 - **Authentication:** Firebase Authentication
 - **File Storage:** Firebase Storage
-- **AI/ML:** Google Genkit with Generative AI API
 - **Payments:** Razorpay
 
 ### DevOps & Tools
@@ -79,7 +75,6 @@ A modern, full-stack web application for tracking agricultural waste and connect
 ### Prerequisites
 - Node.js 18+ and npm
 - Firebase project with Firestore and Authentication enabled
-- Google Genkit API key (for AI features)
 - Razorpay API keys (for payments)
 
 ### Installation
@@ -107,18 +102,11 @@ A modern, full-stack web application for tracking agricultural waste and connect
    # Open http://localhost:9002 in your browser
    ```
 
-5. **Start the Genkit AI server** (in another terminal)
-   ```bash
-   npm run genkit:dev
-   ```
-
 ### Available Commands
 
 ```bash
 # Development
 npm run dev              # Start dev server with Turbopack
-npm run genkit:dev      # Start Genkit AI server
-npm run genkit:watch    # Start Genkit with file watching
 
 # Building
 npm run build           # Build for production
@@ -138,29 +126,22 @@ agritrace/
 ├── src/
 │   ├── app/                      # Next.js App Router
 │   │   ├── api/                  # API routes (Razorpay, webhooks)
-│   │   ├── dashboard/            # Dashboards (Agent, Farmer, Admin)
+│   │   ├── dashboard/            # Main dashboard (Farmer, Agent, Admin)
 │   │   ├── login/                # Login page
 │   │   ├── signup/               # Sign up page
-│   │   ├── tracking/             # Waste tracking pages
-│   │   ├── recycling/            # Recycling management
-│   │   ├── reporting/            # Waste reporting
+│   │   ├── role-selection/       # Role selection after signup
 │   │   └── layout.tsx            # Root layout
 │   ├── components/               # Reusable components
 │   │   ├── ui/                   # Base UI components (Radix)
 │   │   ├── dashboard/            # Dashboard components
-│   │   ├── layout/               # Layout components (Header, Sidebar)
-│   │   ├── tracking/             # Tracking-related components
-│   │   └── reporting/            # Reporting-related components
+│   │   └── layout/               # Layout components (Header, Sidebar)
 │   ├── context/                  # React Context (Auth, etc.)
 │   ├── hooks/                    # Custom React hooks
-│   ├── lib/                      # Utilities and helpers
-│   │   ├── firebase.ts           # Firebase config
-│   │   ├── firebase-service.ts   # Firebase service layer
-│   │   ├── types.ts              # TypeScript types
-│   │   └── utils.ts              # Helper functions
-│   └── ai/                       # AI/Genkit integration
-│       ├── genkit.ts             # Genkit configuration
-│       └── dev.ts                # Development AI tools
+│   └── lib/                      # Utilities and helpers
+│       ├── firebase.ts           # Firebase config
+│       ├── firebase-service.ts   # Firebase service layer
+│       ├── types.ts              # TypeScript types
+│       └── utils.ts              # Helper functions
 ├── public/                       # Static assets
 ├── firestore.rules               # Firestore security rules
 ├── firebase.json                 # Firebase configuration
@@ -184,9 +165,6 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-
-# Server-only (never expose to client)
-GOOGLE_GENAI_API_KEY=your_genkit_api_key
 
 # Razorpay
 NEXT_PUBLIC_RAZORPAY_KEY_ID=your_razorpay_key
@@ -227,44 +205,6 @@ npm run typecheck
 
 # Lint for security issues
 npm run lint
-```
-
----
-
-## 🏗 Development
-
-### Architecture
-
-**Client-Server Communication:**
-- React components use Firebase SDK directly
-- API routes handle backend operations (payments, webhooks)
-- Context API manages global state (Auth)
-- React hooks encapsulate reusable logic
-
-**Data Flow:**
-- Firestore as single source of truth
-- Real-time updates via Firebase listeners
-- Optimistic UI updates for better UX
-
-### Adding Features
-
-1. **New Page/Route:** Add to `src/app/`
-2. **New Component:** Add to `src/components/`
-3. **New Hook:** Add to `src/hooks/`
-4. **New Type:** Update `src/lib/types.ts`
-5. **API Route:** Add to `src/app/api/`
-
-### Code Quality
-
-```bash
-# Type check before committing
-npm run check
-
-# Fix linting issues
-npm run lint:fix
-
-# Watch for issues during development
-npm run genkit:watch
 ```
 
 ---
@@ -336,5 +276,4 @@ Built with:
 - [Firebase](https://firebase.google.com/)
 - [Radix UI](https://www.radix-ui.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- [Google Genkit](https://github.com/firebase/genkit)
 

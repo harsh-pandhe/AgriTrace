@@ -90,3 +90,5 @@ ehthumbs.db
 *.orig
 .cache
 .tmp
+.vercel
+.env*.local

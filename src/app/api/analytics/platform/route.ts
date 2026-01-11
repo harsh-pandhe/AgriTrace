@@ -12,7 +12,6 @@ export async function GET() {
         const usersByRole: { [key: string]: number } = {
             FARMER: 0,
             AGENT: 0,
-            RECYCLER: 0,
             ADMIN: 0,
         };
 

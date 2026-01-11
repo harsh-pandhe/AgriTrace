@@ -6,7 +6,6 @@ import { Timestamp } from 'firebase/firestore';
 export enum UserRole {
   FARMER = 'farmer',
   AGENT = 'agent',
-  RECYCLER = 'recycler',
   ADMIN = 'admin',
 }
 
@@ -134,6 +133,18 @@ export interface AnalyticsData {
 }
 
 /**
+ * Listing Status - Complete workflow
+ */
+export enum ListingStatus {
+  OPEN = 'OPEN',
+  ASSIGNED = 'ASSIGNED',
+  IN_TRANSIT = 'IN_TRANSIT',
+  DELIVERED = 'DELIVERED',
+  RECYCLED = 'RECYCLED',
+  CANCELLED = 'CANCELLED',
+}
+
+/**
  * Listing - Agricultural products/waste for sale
  */
 export interface Listing {
@@ -148,7 +159,11 @@ export interface Listing {
   sellerEmail?: string;
   description?: string;
   img?: string;
+  status?: ListingStatus;
+  assignedAgentId?: string;
+  assignedAgentEmail?: string;
   createdAt?: Timestamp | Date;
+  updatedAt?: Timestamp | Date;
 }
 
 /**

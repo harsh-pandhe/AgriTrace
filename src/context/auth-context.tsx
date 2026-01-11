@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 type User = {
   uid: string;
   email: string | null;
-  role?: 'FARMER' | 'AGENT' | 'RECYCLER' | 'ADMIN';
+  role?: 'FARMER' | 'AGENT' | 'ADMIN';
   name?: string;
   photoURL?: string | null;
 };
@@ -29,7 +29,7 @@ type AuthContextType = {
   login: (email: string, pass: string) => Promise<void>;
   signup: (email: string, pass: string) => Promise<void>;
   logout: () => void;
-  setUserRole: (role: 'FARMER' | 'AGENT' | 'RECYCLER' | 'ADMIN') => Promise<void>;
+  setUserRole: (role: 'FARMER' | 'AGENT' | 'ADMIN') => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   resendVerification: () => Promise<void>;
 };
@@ -85,12 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, pass: string) => {
-    const cred = await signInWithEmailAndPassword(auth, email, pass);
-    if (!cred.user.emailVerified) {
-      // sign out so callers don't have a partially signed-in user
-      await signOut(auth);
-      throw new Error('Please verify your email address before signing in.');
-    }
+    await signInWithEmailAndPassword(auth, email, pass);
   };
 
   const signup = async (email: string, pass: string) => {
@@ -108,11 +103,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await signOut(auth);
-    router.push('/login');
+    // Set loading and clear local user immediately to prevent flicker/redirect loops
+    setLoading(true);
+    setUser(null);
+    try {
+      await signOut(auth);
+    } finally {
+      router.push('/login');
+      setLoading(false);
+    }
   };
 
-  const setUserRole = async (role: 'FARMER' | 'AGENT' | 'RECYCLER' | 'ADMIN') => {
+  const setUserRole = async (role: 'FARMER' | 'AGENT' | 'ADMIN') => {
     if (user) {
       const userDocRef = doc(db, 'users', user.uid);
       await setDoc(userDocRef, { role: role }, { merge: true });

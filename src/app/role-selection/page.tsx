@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-context';
-import { Leaf, Tractor, AlertCircle, CheckCircle2, Zap, Settings } from 'lucide-react';
+import { Leaf, Tractor, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function RoleSelectionPage() {
-  const [role, setRole] = useState<'FARMER' | 'AGENT' | 'RECYCLER' | 'ADMIN'>();
+  const [role, setRole] = useState<'FARMER' | 'AGENT'>();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -29,14 +29,7 @@ export default function RoleSelectionPage() {
           title: 'Role Selected',
           description: `Welcome! You are now registered as a ${role}.`,
         });
-        // Route based on role
-        const routeMap = {
-          FARMER: '/dashboard',
-          AGENT: '/dashboard',
-          RECYCLER: '/recycler',
-          ADMIN: '/admin',
-        };
-        router.push(routeMap[role]);
+        router.push('/dashboard');
       } catch (err: any) {
         setError(err.message);
         toast({
@@ -78,30 +71,6 @@ export default function RoleSelectionPage() {
         'Process waste',
       ],
     },
-    {
-      id: 'RECYCLER' as const,
-      name: 'Recycling Facility',
-      icon: Zap,
-      color: 'purple',
-      description: 'Receive waste, manage processing, and certify recycled products',
-      features: [
-        'Record waste intake',
-        'Manage processing',
-        'Issue certifications',
-      ],
-    },
-    {
-      id: 'ADMIN' as const,
-      name: 'Administrator',
-      icon: Settings,
-      color: 'orange',
-      description: 'Manage users, facilities, and view platform analytics',
-      features: [
-        'User management',
-        'Analytics & reports',
-        'System settings',
-      ],
-    },
   ];
 
   const colorMap = {
@@ -116,18 +85,6 @@ export default function RoleSelectionPage() {
       hover: 'border-green-300 dark:hover:border-green-400',
       icon: 'bg-green-500 text-white',
       button: 'bg-green-500',
-    },
-    purple: {
-      card: 'border-purple-500 bg-purple-50/50 dark:border-purple-400 dark:bg-purple-900/20',
-      hover: 'border-purple-300 dark:hover:border-purple-400',
-      icon: 'bg-purple-500 text-white',
-      button: 'bg-purple-500',
-    },
-    orange: {
-      card: 'border-orange-500 bg-orange-50/50 dark:border-orange-400 dark:bg-orange-900/20',
-      hover: 'border-orange-300 dark:hover:border-orange-400',
-      icon: 'bg-orange-500 text-white',
-      button: 'bg-orange-500',
     },
   };
 
