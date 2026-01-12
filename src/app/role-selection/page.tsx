@@ -1,13 +1,14 @@
 'use client';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Leaf, Truck, AlertCircle, CheckCircle2, ArrowRight, Shield } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
-import { Leaf, Tractor, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function RoleSelectionPage() {
-  const [role, setRole] = useState<'FARMER' | 'AGENT'>();
+  const [role, setRole] = useState<'FARMER' | 'AGENT' | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -17,32 +18,31 @@ export default function RoleSelectionPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
     if (!role) {
       setError('Please select a role to continue.');
       return;
     }
-    if (user) {
-      setLoading(true);
-      try {
-        await setUserRole(role);
-        toast({
-          title: 'Role Selected',
-          description: `Welcome! You are now registered as a ${role}.`,
-        });
-        router.push('/dashboard');
-      } catch (err: any) {
-        setError(err.message);
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to set user role.',
-        });
-      } finally {
-        setLoading(false);
-      }
-    } else {
+
+    if (!user) {
       setError('No user session found. Please log in again.');
       router.push('/login');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await setUserRole(role);
+      toast({
+        title: 'Welcome to AgriTrace!',
+        description: `You're now registered as a ${role === 'FARMER' ? 'Farmer' : 'Collection Agent'}.`,
+      });
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to set user role.' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,166 +51,141 @@ export default function RoleSelectionPage() {
       id: 'FARMER' as const,
       name: 'Farmer',
       icon: Leaf,
-      color: 'teal',
-      description: 'Report and track your agricultural waste, connect with recycling agents',
-      features: [
-        'Report waste easily',
-        'Track collections',
-        'View statistics',
-      ],
+      description: 'Report waste, track collections, earn rewards',
+      features: ['Post waste listings', 'Track pickup status', 'View earnings'],
+      gradient: 'from-emerald-500 to-teal-500',
+      glow: 'shadow-emerald-500/25',
     },
     {
       id: 'AGENT' as const,
       name: 'Collection Agent',
-      icon: Tractor,
-      color: 'green',
-      description: 'Manage collections, process waste, and connect with farmers',
-      features: [
-        'View farmer requests',
-        'Manage collections',
-        'Process waste',
-      ],
+      icon: Truck,
+      description: 'Collect waste, manage deliveries, process efficiently',
+      features: ['Claim pickups', 'Manage routes', 'Track deliveries'],
+      gradient: 'from-blue-500 to-cyan-500',
+      glow: 'shadow-blue-500/25',
     },
   ];
 
-  const colorMap = {
-    teal: {
-      card: 'border-teal-500 bg-teal-50/50 dark:border-teal-400 dark:bg-teal-900/20',
-      hover: 'border-teal-300 dark:hover:border-teal-400',
-      icon: 'bg-teal-500 text-white',
-      button: 'bg-teal-500',
-    },
-    green: {
-      card: 'border-green-500 bg-green-50/50 dark:border-green-400 dark:bg-green-900/20',
-      hover: 'border-green-300 dark:hover:border-green-400',
-      icon: 'bg-green-500 text-white',
-      button: 'bg-green-500',
-    },
-  };
-
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -right-40 -top-40 h-80 w-80 rounded-full bg-teal-500/5 blur-3xl dark:bg-teal-500/10" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-green-500/5 blur-3xl dark:bg-green-500/10" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+      {/* Decorative background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
+        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
       </div>
 
-      <div className="relative flex min-h-screen w-full items-center justify-center p-6 sm:p-8">
-        <div className="w-full max-w-5xl">
+      {/* Header */}
+      <header className="relative z-10 p-4 sm:p-6">
+        <Link href="/" className="inline-flex items-center gap-2 group">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-shadow">
+            <Leaf className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-xl font-bold text-white">AgriTrace</span>
+        </Link>
+      </header>
+
+      {/* Main content */}
+      <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-lg">
           {/* Header */}
-          <div className="mb-12 text-center">
-            <div className="mb-6 flex justify-center">
-              <div className="rounded-2xl bg-gradient-to-br from-teal-500 to-green-600 p-4 shadow-xl">
-                <Leaf className="h-10 w-10 text-white" />
-              </div>
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-400/20 border border-emerald-500/30 mb-4">
+              <Shield className="h-6 w-6 text-emerald-400" />
             </div>
-            <h1 className="mb-3 text-4xl font-bold text-gray-900 dark:text-white font-headline">
-              Choose Your Role
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Select how you'll use AgriTrace to get started
-            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Choose your role</h1>
+            <p className="text-sm text-slate-400">Select how you'll use AgriTrace</p>
           </div>
 
-          {/* Role Selection Cards */}
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {roles.map((roleOption) => {
-                const Icon = roleOption.icon;
-                const colors = colorMap[roleOption.color as keyof typeof colorMap];
-                const isSelected = role === roleOption.id;
-
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Role cards */}
+            <div className="grid gap-4">
+              {roles.map((r) => {
+                const isSelected = role === r.id;
                 return (
                   <button
-                    key={roleOption.id}
+                    key={r.id}
                     type="button"
-                    onClick={() => setRole(roleOption.id)}
-                    className={`group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${isSelected
-                        ? `${colors.card} shadow-xl`
-                        : `border-gray-200 bg-white hover:${colors.hover} dark:border-gray-700 dark:bg-gray-800`
-                      }`}
+                    onClick={() => setRole(r.id)}
+                    className={`relative w-full p-5 sm:p-6 rounded-2xl border text-left transition-all ${
+                      isSelected
+                        ? `bg-white/10 border-white/20 ${r.glow} shadow-lg`
+                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                    }`}
                   >
-                    <div className="p-6 text-center">
-                      {/* Icon */}
-                      <div
-                        className={`mb-4 flex justify-center transition-all duration-300 ${isSelected ? 'scale-110' : 'scale-100'
-                          }`}
-                      >
-                        <div
-                          className={`rounded-xl p-3 transition-all ${isSelected
-                              ? colors.icon
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                            }`}
-                        >
-                          <Icon className="h-8 w-8" />
+                    {/* Selected indicator */}
+                    {isSelected && (
+                      <div className="absolute top-4 right-4">
+                        <div className={`h-6 w-6 rounded-full bg-gradient-to-r ${r.gradient} flex items-center justify-center`}>
+                          <CheckCircle2 className="h-4 w-4 text-white" />
                         </div>
                       </div>
+                    )}
 
-                      {/* Title */}
-                      <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">
-                        {roleOption.name}
-                      </h3>
+                    <div className="flex items-start gap-4">
+                      {/* Icon */}
+                      <div className={`h-12 w-12 rounded-xl bg-gradient-to-r ${r.gradient} flex items-center justify-center flex-shrink-0`}>
+                        <r.icon className="h-6 w-6 text-white" />
+                      </div>
 
-                      {/* Description */}
-                      <p className="mb-4 text-xs text-gray-600 dark:text-gray-400">
-                        {roleOption.description}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-white mb-1">{r.name}</h3>
+                        <p className="text-sm text-slate-400 mb-3">{r.description}</p>
 
-                      {/* Features */}
-                      <ul className="space-y-1 text-left text-xs mb-4">
-                        {roleOption.features.map((feature) => (
-                          <li
-                            key={feature}
-                            className="flex items-center gap-2 text-gray-600 dark:text-gray-400"
-                          >
-                            <CheckCircle2 className="h-3 w-3 flex-shrink-0" style={{ color: `var(--color-${roleOption.color})` }} />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-
-                      {/* Selection indicator */}
-                      {isSelected && (
-                        <div
-                          className={`inline-flex items-center gap-1 rounded-full ${colors.icon} px-3 py-1 text-xs font-semibold`}
-                        >
-                          <CheckCircle2 className="h-3 w-3" />
-                          Selected
+                        {/* Features */}
+                        <div className="flex flex-wrap gap-2">
+                          {r.features.map((feature) => (
+                            <span
+                              key={feature}
+                              className="inline-flex items-center gap-1 text-xs text-slate-300 bg-white/5 px-2 py-1 rounded-lg"
+                            >
+                              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                              {feature}
+                            </span>
+                          ))}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </button>
                 );
               })}
             </div>
 
-            {/* Error message */}
+            {/* Error */}
             {error && (
-              <div className="flex items-start gap-3 rounded-lg bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 text-sm text-red-700 dark:text-red-400">
-                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <span className="font-medium">{error}</span>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 
-            {/* Continue Button */}
-            <Button
+            {/* Submit */}
+            <button
               type="submit"
               disabled={!role || loading}
-              className="w-full py-3 text-lg font-bold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-green-600 hover:from-teal-600 hover:via-teal-700 hover:to-green-700 dark:from-teal-600 dark:to-green-700 rounded-full transition-all shadow-lg hover:shadow-2xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-lg"
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
             >
               {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  <span>Continuing...</span>
-                </div>
+                <>
+                  <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Setting up...</span>
+                </>
               ) : (
-                'Continue'
+                <>
+                  <span>Continue</span>
+                  <ArrowRight className="h-5 w-5" />
+                </>
               )}
-            </Button>
+            </button>
           </form>
+
+          {/* Footer */}
+          <p className="mt-6 text-center text-xs text-slate-500">
+            You can change your role later in settings
+          </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
