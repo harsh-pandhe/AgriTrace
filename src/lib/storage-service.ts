@@ -2,6 +2,8 @@
  * Storage Service - Handles file uploads to Firebase Storage
  */
 
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { storage } from './firebase';
 import { uploadToCloudinary } from './cloudinary-upload';
 
 export interface UploadProgress {

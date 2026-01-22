@@ -152,7 +152,7 @@ export interface Listing {
   title: string;
   price: number;
   quantity?: number;
-  location?: string;
+  location?: LocationData;
   category: string;
   ownerId?: string;
   sellerId?: string;

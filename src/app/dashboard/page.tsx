@@ -165,7 +165,11 @@ function FarmerDashboard({ user, listings }: any) {
         category: formData.get('category') as string,
         sellerId: user?.uid || '',
         sellerEmail: user?.email || '',
-        location: selectedLocation?.address || '',
+        location: selectedLocation ? {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+          address: selectedLocation.address,
+        } : undefined,
         photos,
       });
       toast({ title: 'Success', description: 'Your listing has been published!' });
