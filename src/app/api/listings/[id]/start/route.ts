@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '@/lib/firebase-server';
 
 export async function POST(
@@ -18,10 +18,10 @@ export async function POST(
       );
     }
 
-    const listingRef = doc(db, 'listings', id);
-    const listingDoc = await getDoc(listingRef);
+    const listingRef = db.collection('listings').doc(id);
+    const listingDoc = await listingRef.get();
 
-    if (!listingDoc.exists()) {
+    if (!listingDoc.exists) {
       return NextResponse.json(
         { error: 'Listing not found' },
         { status: 404 }
@@ -30,23 +30,23 @@ export async function POST(
 
     const listing = listingDoc.data();
     
-    if (listing.status !== 'ASSIGNED') {
+    if (listing?.status !== 'ASSIGNED') {
       return NextResponse.json(
         { error: 'Listing must be assigned before starting pickup' },
         { status: 400 }
       );
     }
 
-    if (listing.assignedAgentId !== agentId) {
+    if (listing?.assignedAgentId !== agentId) {
       return NextResponse.json(
         { error: 'Only the assigned agent can start pickup' },
         { status: 403 }
       );
     }
 
-    await updateDoc(listingRef, {
+    await listingRef.update({
       status: 'IN_TRANSIT',
-      updatedAt: serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     return NextResponse.json({ success: true, message: 'Pickup started' });

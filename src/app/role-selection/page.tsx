@@ -3,21 +3,33 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Leaf, Truck, AlertCircle, CheckCircle2, ArrowRight, Shield } from 'lucide-react';
+import { Leaf, Truck, AlertCircle, CheckCircle2, ArrowRight, Shield, User, Phone } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 
 export default function RoleSelectionPage() {
   const [role, setRole] = useState<'FARMER' | 'AGENT' | null>(null);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { user, setUserRole } = useAuth();
+  const { user, setUserRole, updateUserProfile } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!name.trim()) {
+      setError('Please enter your name.');
+      return;
+    }
+
+    if (!phone.trim() || phone.length < 10) {
+      setError('Please enter a valid phone number (at least 10 digits).');
+      return;
+    }
 
     if (!role) {
       setError('Please select a role to continue.');
@@ -32,6 +44,7 @@ export default function RoleSelectionPage() {
 
     setLoading(true);
     try {
+      await updateUserProfile({ name: name.trim(), phone: phone.trim() });
       await setUserRole(role);
       toast({
         title: 'Welcome to AgriTrace!',
@@ -40,7 +53,7 @@ export default function RoleSelectionPage() {
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to set user role.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to complete registration.' });
     } finally {
       setLoading(false);
     }
@@ -99,8 +112,39 @@ export default function RoleSelectionPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-300">Full Name</label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full h-12 pl-12 pr-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Phone input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-300">Phone Number</label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+                <input
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                  className="w-full h-12 pl-12 pr-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                />
+              </div>
+              <p className="text-xs text-slate-500">This will be shared with farmers/agents for coordination</p>
+            </div>
+
             {/* Role cards */}
-            <div className="grid gap-4">
+            <div className="grid gap-4 pt-2">
               {roles.map((r) => {
                 const isSelected = role === r.id;
                 return (

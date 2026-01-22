@@ -75,16 +75,20 @@ const App = () => {
           </div>
 
           <div className="hidden items-center gap-8 xl:gap-12 lg:flex">
-            {['Farmer Portal', 'Agent App', 'Admin Dashboard'].map((item) => (
-              <a key={item} href="#" className="relative text-[10px] font-black uppercase tracking-widest text-slate-400 transition-colors hover:text-slate-900 group">
-                {item}
+            {[
+              { label: 'Farmer Portal', href: '/login' },
+              { label: 'Agent App', href: '/login' },
+              { label: 'Admin Dashboard', href: '/login' },
+            ].map((item) => (
+              <button key={item.label} onClick={() => router.push(item.href)} className="relative text-[10px] font-black uppercase tracking-widest text-slate-400 transition-colors hover:text-slate-900 group">
+                {item.label}
                 <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-emerald-500 transition-all group-hover:w-full" />
-              </a>
+              </button>
             ))}
             <div className="flex items-center gap-3 xl:gap-4">
               <button onClick={() => router.push('/login')} className="rounded-full bg-slate-100 px-4 xl:px-6 py-2.5 text-xs font-black uppercase tracking-widest transition-all hover:bg-slate-200">Sign In</button>
-              <button onClick={() => router.push('/login')} className="group relative overflow-hidden rounded-full bg-slate-900 px-6 xl:px-8 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-slate-200 transition-all hover:scale-105 active:scale-95">
-                <span className="relative z-10">Register Farm</span>
+              <button onClick={() => router.push('/signup')} className="group relative overflow-hidden rounded-full bg-slate-900 px-6 xl:px-8 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-slate-200 transition-all hover:scale-105 active:scale-95">
+                <span className="relative z-10">Register</span>
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-emerald-600 to-lime-500 transition-transform duration-500 group-hover:translate-x-0" />
               </button>
             </div>
@@ -99,14 +103,18 @@ const App = () => {
         {isMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-xl">
             <div className="px-6 py-6 space-y-4">
-              {['Farmer Portal', 'Agent App', 'Admin Dashboard'].map((item) => (
-                <a key={item} href="#" className="block text-sm font-bold text-slate-700 py-2 hover:text-emerald-600 transition-colors">
-                  {item}
-                </a>
+              {[
+                { label: 'Farmer Portal', href: '/login' },
+                { label: 'Agent App', href: '/login' },
+                { label: 'Admin Dashboard', href: '/login' },
+              ].map((item) => (
+                <button key={item.label} onClick={() => { router.push(item.href); setIsMenuOpen(false); }} className="block w-full text-left text-sm font-bold text-slate-700 py-2 hover:text-emerald-600 transition-colors">
+                  {item.label}
+                </button>
               ))}
               <div className="pt-4 space-y-3 border-t border-slate-100">
                 <button onClick={() => { router.push('/login'); setIsMenuOpen(false); }} className="w-full rounded-xl bg-slate-100 py-3 text-sm font-bold transition-all hover:bg-slate-200">Sign In</button>
-                <button onClick={() => { router.push('/signup'); setIsMenuOpen(false); }} className="w-full rounded-xl bg-slate-900 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-600">Register Farm</button>
+                <button onClick={() => { router.push('/signup'); setIsMenuOpen(false); }} className="w-full rounded-xl bg-slate-900 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-600">Register</button>
               </div>
             </div>
           </div>

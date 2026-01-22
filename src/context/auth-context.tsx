@@ -19,6 +19,7 @@ type User = {
   email: string | null;
   role?: 'FARMER' | 'AGENT' | 'ADMIN';
   name?: string;
+  phone?: string;
   photoURL?: string | null;
 };
 
@@ -30,6 +31,7 @@ type AuthContextType = {
   signup: (email: string, pass: string) => Promise<void>;
   logout: () => void;
   setUserRole: (role: 'FARMER' | 'AGENT' | 'ADMIN') => Promise<void>;
+  updateUserProfile: (profile: { name?: string; phone?: string }) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   resendVerification: () => Promise<void>;
 };
@@ -50,8 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       console.log('AuthProvider: Auth state changed', { user: firebaseUser?.uid, email: firebaseUser?.email });
 
-      try {
-        if (firebaseUser) {
+      if (firebaseUser) {
+        try {
           const userDocRef = doc(db, 'users', firebaseUser.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
@@ -61,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email: firebaseUser.email,
               role: userData.role,
               name: userData.name,
+              phone: userData.phone,
               photoURL: firebaseUser.photoURL
             });
           } else {
@@ -70,13 +73,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               photoURL: firebaseUser.photoURL
             });
           }
-        } else {
-          setUser(null);
+        } catch (error) {
+          console.error('Auth state change error:', error);
+          // Still set user even if Firestore read fails
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            photoURL: firebaseUser.photoURL
+          });
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Auth state change error:', error);
+      } else {
         setUser(null);
-      } finally {
         setLoading(false);
       }
     });
@@ -122,6 +131,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUserProfile = async (profile: { name?: string; phone?: string }) => {
+    if (user) {
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, profile, { merge: true });
+      setUser((prevUser) => ({ ...prevUser!, ...profile }));
+    }
+  };
+
   const sendPasswordReset = async (email: string) => {
     await sendPasswordResetEmail(auth, email);
   };
@@ -139,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signup,
     logout,
     setUserRole,
+    updateUserProfile,
     sendPasswordReset,
     resendVerification,
   };

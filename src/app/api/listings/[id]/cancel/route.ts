@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '@/lib/firebase-server';
 
 export async function POST(
@@ -18,10 +18,10 @@ export async function POST(
       );
     }
 
-    const listingRef = doc(db, 'listings', id);
-    const listingDoc = await getDoc(listingRef);
+    const listingRef = db.collection('listings').doc(id);
+    const listingDoc = await listingRef.get();
 
-    if (!listingDoc.exists()) {
+    if (!listingDoc.exists) {
       return NextResponse.json(
         { error: 'Listing not found' },
         { status: 404 }
@@ -31,23 +31,23 @@ export async function POST(
     const listing = listingDoc.data();
     
     // Only allow cancellation if OPEN (or no status) and user is the owner
-    if (listing.status && listing.status !== 'OPEN') {
+    if (listing?.status && listing.status !== 'OPEN') {
       return NextResponse.json(
         { error: 'Can only cancel listings that are still open' },
         { status: 400 }
       );
     }
 
-    if (listing.sellerId !== farmerId) {
+    if (listing?.sellerId !== farmerId) {
       return NextResponse.json(
         { error: 'Only the listing owner can cancel' },
         { status: 403 }
       );
     }
 
-    await updateDoc(listingRef, {
+    await listingRef.update({
       status: 'CANCELLED',
-      updatedAt: serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     return NextResponse.json({ success: true, message: 'Listing cancelled' });

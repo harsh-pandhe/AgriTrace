@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '@/lib/firebase-server';
 
 export async function POST(
@@ -18,10 +18,10 @@ export async function POST(
       );
     }
 
-    const listingRef = doc(db, 'listings', id);
-    const listingDoc = await getDoc(listingRef);
+    const listingRef = db.collection('listings').doc(id);
+    const listingDoc = await listingRef.get();
 
-    if (!listingDoc.exists()) {
+    if (!listingDoc.exists) {
       return NextResponse.json(
         { error: 'Listing not found' },
         { status: 404 }
@@ -30,17 +30,17 @@ export async function POST(
 
     const listing = listingDoc.data();
     
-    if (listing.status !== 'DELIVERED') {
+    if (listing?.status !== 'DELIVERED') {
       return NextResponse.json(
         { error: 'Listing must be delivered before marking as recycled' },
         { status: 400 }
       );
     }
 
-    await updateDoc(listingRef, {
+    await listingRef.update({
       status: 'RECYCLED',
-      recycledAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      recycledAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     return NextResponse.json({ 

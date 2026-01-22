@@ -94,8 +94,24 @@ export default function LoginPage() {
         } catch {}
       }
     } catch (err: any) {
-      setError(err.message || 'Invalid credentials');
-      toast({ variant: 'destructive', title: 'Login Failed', description: err.message });
+      // Map Firebase error codes to user-friendly messages
+      let errorMessage = 'Invalid credentials';
+      const errorCode = err.code || '';
+      
+      if (errorCode === 'auth/user-not-found' || errorCode === 'auth/invalid-email') {
+        errorMessage = 'No account found with this email address. Please check your email or sign up.';
+      } else if (errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-credential') {
+        errorMessage = 'Incorrect password. Please try again or reset your password.';
+      } else if (errorCode === 'auth/too-many-requests') {
+        errorMessage = 'Too many failed attempts. Please wait a few minutes before trying again.';
+      } else if (errorCode === 'auth/user-disabled') {
+        errorMessage = 'This account has been disabled. Please contact support.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      toast({ variant: 'destructive', title: 'Login Failed', description: errorMessage });
     } finally {
       setLoadingLocal(false);
     }

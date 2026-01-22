@@ -8,6 +8,9 @@ import { useFirebase } from '@/hooks/use-firebase';
 import { useToast } from '@/hooks/use-toast';
 import { onSnapshot } from 'firebase/firestore';
 import type { Listing } from '@/lib/types';
+import { LocationPicker } from '@/components/location-picker';
+import { PhotoUploader } from '@/components/photo-uploader';
+import type { Location } from '@/lib/location-service';
 import {
   Leaf,
   BarChart3,
@@ -25,6 +28,11 @@ import {
   ChevronRight,
   Home,
   Sparkles,
+  MapPin,
+  Pencil,
+  Phone,
+  User,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 // ============ HEADER ============
@@ -116,6 +124,8 @@ function FarmerDashboard({ user, listings }: any) {
   const [posting, setPosting] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<(Location & { address: string }) | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
   const { createListing } = useFirebase();
   const { toast } = useToast();
 
@@ -154,9 +164,17 @@ function FarmerDashboard({ user, listings }: any) {
         category: formData.get('category') as string,
         sellerId: user?.uid || '',
         sellerEmail: user?.email || '',
+        location: selectedLocation ? {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+          address: selectedLocation.address,
+        } : undefined,
+        photos,
       });
       toast({ title: 'Success', description: 'Your listing has been published!' });
       setIsDialogOpen(false);
+      setSelectedLocation(null);
+      setPhotos([]);
       (e.target as HTMLFormElement).reset();
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to create listing.', variant: 'destructive' });
@@ -291,6 +309,9 @@ function FarmerDashboard({ user, listings }: any) {
                             {item.assignedAgentEmail && (
                               <p className="text-xs text-emerald-400 font-medium mt-1">Agent: {item.assignedAgentEmail}</p>
                             )}
+                            {item.assignedAgentPhone && (
+                              <p className="text-xs text-blue-400 font-medium">📞 {item.assignedAgentPhone}</p>
+                            )}
                           </div>
                         </div>
                         <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-2">
@@ -417,55 +438,168 @@ function FarmerDashboard({ user, listings }: any) {
 
       {/* Post Dialog */}
       {isDialogOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 sm:p-4 md:p-6">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setIsDialogOpen(false)} />
-          <div className="relative w-full max-w-xl bg-[#0a120a] rounded-2xl sm:rounded-3xl border border-white/10 shadow-2xl p-6 sm:p-10">
-            <div className="absolute -top-20 -right-20 h-40 w-40 bg-emerald-500/20 rounded-full blur-[80px]" />
-            <div className="flex items-center justify-between mb-6 sm:mb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white">Post <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Waste</span></h2>
-              <button onClick={() => setIsDialogOpen(false)} className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition-all">
-                <X size={20} />
+          <div className="relative w-full h-full sm:h-auto sm:w-full max-w-5xl bg-[#0a120a] rounded-none sm:rounded-3xl border border-white/10 shadow-2xl overflow-hidden max-h-[90vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 sm:p-6 md:p-8 border-b border-white/5">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
+                Post <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Waste</span>
+              </h2>
+              <button
+                onClick={() => setIsDialogOpen(false)}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition-all"
+              >
+                <X size={16} className="sm:w-5 sm:h-5" />
               </button>
             </div>
-            <form onSubmit={handlePostSubmit} className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Category</label>
-                  <select name="category" defaultValue="rice" className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="rice" className="bg-[#0a120a]">Rice Husk</option>
-                    <option value="wheat" className="bg-[#0a120a]">Wheat Stubble</option>
-                    <option value="sugarcane" className="bg-[#0a120a]">Sugarcane Bagasse</option>
-                    <option value="cotton" className="bg-[#0a120a]">Cotton Stalks</option>
-                  </select>
+
+            {/* Form Content */}
+            <div className="flex-1 overflow-y-auto max-h-[75vh] p-4 sm:p-6 md:p-8">
+              <form onSubmit={handlePostSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Basic Info Section */}
+                  <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Basic Information</h3>
+
+                  {/* Category and Quantity - Responsive Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Category</label>
+                      <select
+                        name="category"
+                        defaultValue="rice"
+                        className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all"
+                      >
+                        <option value="rice" className="bg-[#0a120a]">Rice Husk</option>
+                        <option value="wheat" className="bg-[#0a120a]">Wheat Stubble</option>
+                        <option value="sugarcane" className="bg-[#0a120a]">Sugarcane Bagasse</option>
+                        <option value="cotton" className="bg-[#0a120a]">Cotton Stalks</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Quantity (MT)</label>
+                      <input
+                        name="quantity"
+                        type="number"
+                        step="0.1"
+                        placeholder="1.2"
+                        className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Title</label>
+                    <input
+                      name="title"
+                      type="text"
+                      placeholder="Enter title"
+                      className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all"
+                      required
+                    />
+                  </div>
+
+                  {/* Price */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                      Price (<span style={{fontFamily: 'Arial'}}>₹</span>/MT)
+                    </label>
+                    <input
+                      name="price"
+                      type="number"
+                      placeholder="500"
+                      className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all"
+                      required
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Description</label>
+                    <textarea
+                      name="description"
+                      rows={3}
+                      placeholder="Describe your waste..."
+                      className="w-full bg-white/[0.04] border border-white/10 rounded-xl p-4 text-sm text-white font-medium placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none resize-none transition-all"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Quantity (MT)</label>
-                  <input name="quantity" type="number" step="0.1" placeholder="1.2" className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all" required />
+
+                {/* Location Section */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Pickup Location</h3>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide flex items-center gap-2">
+                      <MapPin size={14} />
+                      Location
+                    </label>
+                    <LocationPicker
+                      onLocationSelected={(loc) => setSelectedLocation(loc)}
+                      initialLocation={selectedLocation || undefined}
+                      initialAddress={selectedLocation?.address}
+                    />
+                    {selectedLocation && (
+                      <p className="text-xs text-emerald-400 mt-2 flex items-start gap-1">
+                        <span>📍</span>
+                        <span className="break-words">{selectedLocation.address}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Title</label>
-                <input name="title" type="text" placeholder="Enter title" className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all" required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Price (<span style={{fontFamily: 'Arial'}}>₹</span>/MT)</label>
-                <input name="price" type="number" placeholder="500" className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all" required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Description</label>
-                <textarea name="description" rows={3} placeholder="Describe your waste..." className="w-full bg-white/[0.04] border border-white/10 rounded-xl p-4 text-sm text-white font-medium placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none resize-none transition-all" required />
-              </div>
-              <button type="submit" disabled={posting} className="w-full h-12 sm:h-14 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all disabled:opacity-70 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2">
-                {posting ? (
-                  <>
-                    <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Publishing...</span>
-                  </>
-                ) : (
-                  <span>Publish Listing</span>
-                )}
-              </button>
-            </form>
+
+                {/* Photos Section */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Photos</h3>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide flex items-center gap-2">
+                      <ImageIcon size={14} />
+                      Upload Photos (Optional)
+                    </label>
+                    <PhotoUploader
+                      userId={user?.uid}
+                      wasteReportId={user?.uid + '-' + Date.now()}
+                      photos={photos}
+                      onPhotoAdded={(url) => setPhotos((prev) => [...prev, url])}
+                      onPhotoRemoved={(url) => setPhotos((prev) => prev.filter((p) => p !== url))}
+                      maxPhotos={5}
+                    />
+                    {photos.length > 0 && (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mt-3">
+                        {photos.map((url) => (
+                          <img
+                            key={url}
+                            src={url}
+                            alt="Waste"
+                            className="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded-lg border border-white/10 hover:border-emerald-500/50 transition-all"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="pt-4 border-t border-white/5 md:col-span-2">
+                  <button
+                    type="submit"
+                    disabled={posting}
+                    className="w-full h-12 sm:h-14 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all disabled:opacity-70 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2"
+                  >
+                    {posting ? (
+                      <>
+                        <div className="h-4 w-4 sm:h-5 sm:w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Publishing...</span>
+                      </>
+                    ) : (
+                      <span>Publish Listing</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
@@ -494,7 +628,7 @@ function AgentDashboard({ user, listings }: any) {
       const res = await fetch(`/api/listings/${listingId}/claim`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agentId: user?.uid, agentEmail: user?.email }),
+        body: JSON.stringify({ agentId: user?.uid, agentEmail: user?.email, agentPhone: user?.phone || null }),
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Failed to claim');
       toast({ title: 'Success', description: 'Listing claimed! You can now pick it up.' });
@@ -733,8 +867,12 @@ function AdminDashboard({ user, listings }: any) {
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [viewListing, setViewListing] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [recyclingId, setRecyclingId] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editForm, setEditForm] = useState({ name: '', phone: '', role: '' });
+  const [savingUser, setSavingUser] = useState(false);
   const { toast } = useToast();
 
   const handleRecycle = async (listingId: string) => {
@@ -752,6 +890,32 @@ function AdminDashboard({ user, listings }: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setRecyclingId(null);
+    }
+  };
+
+  const openEditUser = (u: any) => {
+    setEditingUser(u);
+    setEditForm({ name: u.name || '', phone: u.phone || '', role: u.role || '' });
+  };
+
+  const handleSaveUser = async () => {
+    if (!editingUser) return;
+    setSavingUser(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: editingUser.id, ...editForm }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Failed to update user');
+      // Update local state
+      setUsers(users.map((u: any) => u.id === editingUser.id ? { ...u, ...editForm } : u));
+      toast({ title: 'Success', description: 'User updated successfully!' });
+      setEditingUser(null);
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setSavingUser(false);
     }
   };
 
@@ -1114,7 +1278,13 @@ function AdminDashboard({ user, listings }: any) {
                               {status.replace('_', ' ')}
                             </span>
                           </td>
-                          <td className="p-3 sm:p-4">
+                          <td className="p-3 sm:p-4 flex gap-2">
+                            <button
+                              onClick={() => setViewListing(item)}
+                              className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-blue-500 to-teal-500 text-white text-[9px] sm:text-[10px] font-semibold uppercase rounded-lg hover:from-blue-400 hover:to-teal-400 transition-all shadow-lg shadow-blue-500/10"
+                            >
+                              View
+                            </button>
                             {status === 'DELIVERED' && (
                               <button
                                 onClick={() => handleRecycle(item.id)}
@@ -1128,6 +1298,80 @@ function AdminDashboard({ user, listings }: any) {
                               <span className="text-[10px] text-teal-400 font-semibold">✓ Complete</span>
                             )}
                           </td>
+                              {/* Listing View Modal */}
+                              {viewListing && (
+                                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                                  <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
+                                    <button
+                                      onClick={() => setViewListing(null)}
+                                      className="absolute top-4 right-4 h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                                    >
+                                      <X size={18} />
+                                    </button>
+                                    <h3 className="text-xl font-bold text-white mb-4">Listing Details</h3>
+                                    <div className="space-y-3">
+                                      <div>
+                                        <span className="text-xs font-semibold text-slate-400 uppercase">Title</span>
+                                        <div className="text-white font-semibold">{viewListing.title}</div>
+                                      </div>
+                                      <div>
+                                        <span className="text-xs font-semibold text-slate-400 uppercase">Farmer</span>
+                                        <div className="text-slate-300">{viewListing.sellerEmail}</div>
+                                      </div>
+                                      <div className="flex gap-4">
+                                        <div>
+                                          <span className="text-xs font-semibold text-slate-400 uppercase">Category</span>
+                                          <div className="text-slate-300">{viewListing.category}</div>
+                                        </div>
+                                        <div>
+                                          <span className="text-xs font-semibold text-slate-400 uppercase">Quantity</span>
+                                          <div className="text-slate-300">{viewListing.quantity} MT</div>
+                                        </div>
+                                        <div>
+                                          <span className="text-xs font-semibold text-slate-400 uppercase">Price</span>
+                                          <div className="text-emerald-400 font-semibold"><span style={{fontFamily: 'Arial'}}>₹</span>{viewListing.price}</div>
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <span className="text-xs font-semibold text-slate-400 uppercase">Description</span>
+                                        <div className="text-slate-300">{viewListing.description}</div>
+                                      </div>
+                                      <div>
+                                        <span className="text-xs font-semibold text-slate-400 uppercase">Status</span>
+                                        <div className="text-xs font-bold uppercase px-2 py-1 rounded-full border inline-block mt-1 mb-2 " style={{ borderColor: '#10b981', color: '#10b981' }}>{viewListing.status || 'OPEN'}</div>
+                                      </div>
+                                      {viewListing.photos && viewListing.photos.length > 0 && (
+                                        <div>
+                                          <span className="text-xs font-semibold text-slate-400 uppercase">Photos</span>
+                                          <div className="flex flex-wrap gap-2 mt-2">
+                                            {viewListing.photos.map((url: string, idx: number) => (
+                                              <img key={idx} src={url} alt="Waste" className="h-20 w-20 object-cover rounded-lg border border-white/10" />
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                      {viewListing.location && (
+                                        <div>
+                                          <span className="text-xs font-semibold text-slate-400 uppercase">Pickup Location</span>
+                                          <div className="text-slate-300 mt-1">
+                                            {viewListing.location.address && <div>{viewListing.location.address}</div>}
+                                            {viewListing.location.latitude && viewListing.location.longitude && (
+                                              <a
+                                                href={`https://maps.google.com/?q=${viewListing.location.latitude},${viewListing.location.longitude}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-emerald-400 underline text-xs"
+                                              >
+                                                View on Map
+                                              </a>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                         </tr>
                       );
                     })}
@@ -1168,8 +1412,11 @@ function AdminDashboard({ user, listings }: any) {
                   <thead className="bg-white/[0.02]">
                     <tr>
                       <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Email</th>
+                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Name</th>
+                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Phone</th>
                       <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Role</th>
                       <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Joined</th>
+                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1184,6 +1431,12 @@ function AdminDashboard({ user, listings }: any) {
                           </div>
                         </td>
                         <td className="p-3 sm:p-4">
+                          <p className="text-sm text-slate-300">{u.name || '-'}</p>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <p className="text-sm text-slate-300">{u.phone || '-'}</p>
+                        </td>
+                        <td className="p-3 sm:p-4">
                           <span className={`text-[9px] sm:text-[10px] font-bold uppercase px-2 sm:px-3 py-1 rounded-full border ${roleColors[u.role] || 'bg-slate-500/20 text-slate-400 border-slate-500/30'}`}>
                             {u.role || 'UNKNOWN'}
                           </span>
@@ -1192,6 +1445,17 @@ function AdminDashboard({ user, listings }: any) {
                           <p className="text-sm text-slate-400">
                             {u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString() : '-'}
                           </p>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEditUser(u)}
+                            className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 text-xs"
+                          >
+                            <Pencil size={14} className="mr-1" />
+                            Edit
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -1210,6 +1474,89 @@ function AdminDashboard({ user, listings }: any) {
           </div>
         )}
       </main>
+
+      {/* Edit User Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Edit User</h3>
+              <button
+                onClick={() => setEditingUser(null)}
+                className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-2 block">Email</label>
+                <p className="text-white bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm">{editingUser.email}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-2 block">Name</label>
+                <div className="relative">
+                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    placeholder="Enter name"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-2 block">Phone</label>
+                <div className="relative">
+                  <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="tel"
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    placeholder="Enter phone number"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-2 block">Role</label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+                >
+                  <option value="" className="bg-slate-900">Select role</option>
+                  <option value="farmer" className="bg-slate-900">Farmer</option>
+                  <option value="agent" className="bg-slate-900">Agent</option>
+                  <option value="admin" className="bg-slate-900">Admin</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setEditingUser(null)}
+                className="flex-1 border-white/10 text-slate-400 hover:bg-white/5"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveUser}
+                disabled={savingUser}
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0"
+              >
+                {savingUser ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

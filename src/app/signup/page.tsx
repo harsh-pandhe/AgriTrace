@@ -99,8 +99,24 @@ export default function SignupPage() {
       toast({ title: 'Account created!', description: 'Welcome to AgriTrace.' });
       router.push('/role-selection');
     } catch (err: any) {
-      setError(err.message || 'Could not create account');
-      toast({ variant: 'destructive', title: 'Signup Failed', description: err.message });
+      // Map Firebase error codes to user-friendly messages
+      let errorMessage = 'Could not create account';
+      const errorCode = err.code || '';
+      
+      if (errorCode === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already registered. Please login or use a different email.';
+      } else if (errorCode === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (errorCode === 'auth/weak-password') {
+        errorMessage = 'Password is too weak. Please use at least 6 characters with letters and numbers.';
+      } else if (errorCode === 'auth/operation-not-allowed') {
+        errorMessage = 'Email/password signup is currently disabled. Please contact support.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      toast({ variant: 'destructive', title: 'Signup Failed', description: errorMessage });
     } finally {
       setLoadingLocal(false);
     }

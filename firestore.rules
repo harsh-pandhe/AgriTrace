@@ -7,141 +7,84 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
-    
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-    
-    function getUserRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-    }
-    
-    function isAdmin() {
-      return isAuthenticated() && getUserRole() == 'ADMIN';
-    }
-    
-    function isAgent() {
-      return isAuthenticated() && getUserRole() == 'AGENT';
-    }
-    
-    function isRecycler() {
-      return isAuthenticated() && getUserRole() == 'RECYCLER';
-    }
-    
-    function isFarmer() {
-      return isAuthenticated() && getUserRole() == 'FARMER';
-    }
 
-    // Users collection
+    // Users collection - authenticated users can read all, but only write own
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isOwner(userId) || isAdmin();
-      allow delete: if isAdmin();
+      allow update: if isAuthenticated();
+      allow delete: if false;
     }
 
-    // Waste reports
+    // Waste reports - authenticated users can read, create if they're the farmer
     match /wasteReports/{reportId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isFarmer();
-      allow update: if isOwner(resource.data.farmerId) || isAgent() || isRecycler() || isAdmin();
-      allow delete: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if false;
     }
 
     // Waste intakes
     match /wasteIntakes/{intakeId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isRecycler();
-      allow update: if isRecycler() || isAdmin();
-      allow delete: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if false;
     }
 
     // Waste processing
     match /wasteProcessing/{processingId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isRecycler();
-      allow update: if isRecycler() || isAdmin();
-      allow delete: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if false;
     }
 
     // Waste deliveries
     match /wasteDeliveries/{deliveryId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isAgent();
-      allow update: if isAgent() || isRecycler() || isAdmin();
-      allow delete: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if false;
     }
 
     // Notifications
     match /notifications/{notificationId} {
-      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow create: if isAuthenticated();
-      allow update: if isOwner(resource.data.userId);
-      allow delete: if isOwner(resource.data.userId) || isAdmin();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
     // Payments
     match /payments/{paymentId} {
-      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow update: if false;
+      allow delete: if false;
     }
 
     // Recycling facilities
     match /facilities/{facilityId} {
       allow read: if isAuthenticated();
-      allow create: if isAdmin();
-      allow update: if isRecycler() || isAdmin();
-      allow delete: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if false;
     }
 
-    // Legacy rules for backward compatibility
+    // Listings - key fix: use sellerId instead of ownerId
     match /listings/{listingId} {
-      // Anyone authenticated can read listings
-      allow read: if request.auth != null;
-
-      // Create if authenticated and ownerId matches auth.uid
-      allow create: if request.auth != null
-                    && request.resource.data.ownerId == request.auth.uid
-                    && request.resource.data.title is string
-                    && request.resource.data.price is number
-                    && request.resource.data.location is string;
-
-      // Owners can update their own listing; agents can update/delete
-      allow update: if request.auth != null && (
-                      request.auth.uid == resource.data.ownerId ||
-                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'agent')
-                    );
-
-      allow delete: if request.auth != null && (
-                      request.auth.uid == resource.data.ownerId ||
-                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'agent')
-                    );
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.sellerId;
     }
 
-    // Orders: buyers create orders; buyer/seller/agent can read; updates limited to agent or buyer
+    // Orders
     match /orders/{orderId} {
-      // Create: buyer must be authenticated and match
-      allow create: if request.auth != null
-                    && request.resource.data.buyerId == request.auth.uid
-                    && request.resource.data.listingId is string
-                    && request.resource.data.price is number;
-
-      // Read: buyer, seller (owner of listing), or agent
-      allow read: if request.auth != null && (
-                    resource.data.buyerId == request.auth.uid ||
-                    resource.data.sellerId == request.auth.uid ||
-                    (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'agent')
-                  );
-
-      // Update: buyer (e.g., cancel) or agent
-      allow update: if request.auth != null && (
-                      request.auth.uid == resource.data.buyerId ||
-                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'agent')
-                    );
-
-      // Deletion is not allowed
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
       allow delete: if false;
     }
 
@@ -151,3 +94,4 @@ service cloud.firestore {
     }
   }
 }
+

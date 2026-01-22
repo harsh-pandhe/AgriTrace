@@ -1,18 +1,14 @@
 import { NextResponse } from 'next/server';
-import { collection, query, where, getCountFromServer } from 'firebase/firestore';
 import { db } from '@/lib/firebase-server';
 
 export async function GET() {
   try {
-    const usersRef = collection(db, 'users');
-    const farmersQuery = query(usersRef, where('role', '==', 'FARMER'));
-    const agentsQuery = query(usersRef, where('role', '==', 'AGENT'));
-    const adminsQuery = query(usersRef, where('role', '==', 'ADMIN'));
+    const usersRef = db.collection('users');
     
     const [farmersSnap, agentsSnap, adminsSnap] = await Promise.all([
-      getCountFromServer(farmersQuery),
-      getCountFromServer(agentsQuery),
-      getCountFromServer(adminsQuery),
+      usersRef.where('role', '==', 'FARMER').count().get(),
+      usersRef.where('role', '==', 'AGENT').count().get(),
+      usersRef.where('role', '==', 'ADMIN').count().get(),
     ]);
 
     const stats = {

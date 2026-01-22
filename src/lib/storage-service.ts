@@ -2,13 +2,8 @@
  * Storage Service - Handles file uploads to Firebase Storage
  */
 
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from './firebase';
-import {
-    ref,
-    uploadBytes,
-    getDownloadURL,
-    deleteObject,
-} from 'firebase/storage';
 
 export interface UploadProgress {
     loaded: number;
@@ -30,27 +25,22 @@ export const uploadWastePhoto = async (
         if (!file.type.startsWith('image/')) {
             throw new Error('File must be an image');
         }
-
         if (file.size > 5 * 1024 * 1024) {
             // 5MB limit
             throw new Error('File size must be less than 5MB');
         }
 
-        // Create file reference with timestamp
         const fileName = `${Date.now()}-${file.name}`;
         const fileRef = ref(
             storage,
             `waste-reports/${userId}/${wasteReportId}/${fileName}`
         );
 
-        // Upload file
         const snapshot = await uploadBytes(fileRef, file, {
             contentType: file.type,
         });
 
-        // Get download URL
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        return downloadURL;
+        return await getDownloadURL(snapshot.ref);
     } catch (error) {
         throw new Error(
             `Failed to upload photo: ${error instanceof Error ? error.message : 'Unknown error'}`
