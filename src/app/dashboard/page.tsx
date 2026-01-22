@@ -8,7 +8,8 @@ import { useFirebase } from '@/hooks/use-firebase';
 import { useToast } from '@/hooks/use-toast';
 import { onSnapshot } from 'firebase/firestore';
 import type { Listing } from '@/lib/types';
-import { LocationPicker } from '@/components/location-picker';
+import { Button } from '@/components/ui/button';
+import LocationPicker from '@/components/location-picker';
 import { PhotoUploader } from '@/components/photo-uploader';
 import type { Location } from '@/lib/location-service';
 import {
@@ -164,11 +165,7 @@ function FarmerDashboard({ user, listings }: any) {
         category: formData.get('category') as string,
         sellerId: user?.uid || '',
         sellerEmail: user?.email || '',
-        location: selectedLocation ? {
-          latitude: selectedLocation.latitude,
-          longitude: selectedLocation.longitude,
-          address: selectedLocation.address,
-        } : undefined,
+        location: selectedLocation?.address || '',
         photos,
       });
       toast({ title: 'Success', description: 'Your listing has been published!' });
@@ -1088,10 +1085,34 @@ function AdminDashboard({ user, listings }: any) {
                       const status = item.status || 'OPEN';
                       return (
                         <div key={item.id} className="flex items-center gap-4 p-4 bg-white/[0.02] rounded-xl border border-white/5 hover:bg-white/[0.05] transition-all">
-                          <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-lg flex-shrink-0">🌾</div>
+                          <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-lg flex-shrink-0">
+                            {item.photos && item.photos.length > 0 ? (
+                              <img src={item.photos[0]} alt="Waste" className="h-10 w-10 rounded-lg object-cover" />
+                            ) : (
+                              '🌾'
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-white text-sm truncate">{item.title}</p>
-                            <p className="text-xs text-slate-400 truncate">{item.sellerEmail} • {item.quantity}MT • <span style={{fontFamily: 'Arial'}}>₹</span>{item.price}/MT</p>
+                            <p className="text-xs text-slate-400 truncate flex items-center gap-2">
+                              <span>{item.sellerEmail}</span>
+                              {item.location?.address && (
+                                <>
+                                  <span>•</span>
+                                  <MapPin size={10} className="text-slate-500" />
+                                  <span className="truncate max-w-[100px]">{item.location.address}</span>
+                                </>
+                              )}
+                              <span>•</span>
+                              <span>{item.quantity}MT • <span style={{fontFamily: 'Arial'}}>₹</span>{item.price}/MT</span>
+                              {item.photos && item.photos.length > 0 && (
+                                <>
+                                  <span>•</span>
+                                  <ImageIcon size={10} className="text-emerald-400" />
+                                  <span className="text-emerald-400">{item.photos.length}</span>
+                                </>
+                              )}
+                            </p>
                           </div>
                           <span className={`text-[9px] sm:text-[10px] font-bold uppercase px-2 sm:px-3 py-1 rounded-full border whitespace-nowrap ${statusColors[status]}`}>
                             {status.replace('_', ' ')}
@@ -1245,8 +1266,10 @@ function AdminDashboard({ user, listings }: any) {
                       <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden lg:table-cell">Category</th>
                       <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Qty</th>
                       <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Price</th>
+                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden xl:table-cell">Location</th>
                       <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden lg:table-cell">Agent</th>
                       <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Status</th>
+                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Media</th>
                       <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Actions</th>
                     </tr>
                   </thead>
@@ -1270,6 +1293,20 @@ function AdminDashboard({ user, listings }: any) {
                           <td className="p-3 sm:p-4">
                             <p className="font-semibold text-emerald-400"><span style={{fontFamily: 'Arial'}}>₹</span>{item.price}</p>
                           </td>
+                          <td className="p-3 sm:p-4 hidden xl:table-cell">
+                            <div className="flex items-center gap-2">
+                              {item.location?.address ? (
+                                <div className="flex items-center gap-1">
+                                  <MapPin size={12} className="text-slate-400" />
+                                  <span className="text-sm text-slate-400 truncate max-w-[120px]" title={item.location.address}>
+                                    {item.location.address}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-sm text-slate-500">-</span>
+                              )}
+                            </div>
+                          </td>
                           <td className="p-3 sm:p-4 hidden lg:table-cell">
                             <p className="text-sm text-slate-400 truncate max-w-[150px]">{item.assignedAgentEmail || '-'}</p>
                           </td>
@@ -1277,6 +1314,18 @@ function AdminDashboard({ user, listings }: any) {
                             <span className={`text-[9px] sm:text-[10px] font-bold uppercase px-2 sm:px-3 py-1 rounded-full border ${statusColors[status]}`}>
                               {status.replace('_', ' ')}
                             </span>
+                          </td>
+                          <td className="p-3 sm:p-4">
+                            <div className="flex items-center gap-2">
+                              {item.photos && item.photos.length > 0 ? (
+                                <div className="flex items-center gap-1">
+                                  <ImageIcon size={14} className="text-emerald-400" />
+                                  <span className="text-xs text-emerald-400 font-semibold">{item.photos.length}</span>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-slate-500">-</span>
+                              )}
+                            </div>
                           </td>
                           <td className="p-3 sm:p-4 flex gap-2">
                             <button
@@ -1301,71 +1350,117 @@ function AdminDashboard({ user, listings }: any) {
                               {/* Listing View Modal */}
                               {viewListing && (
                                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                                  <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
+                                  <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
                                     <button
                                       onClick={() => setViewListing(null)}
                                       className="absolute top-4 right-4 h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
                                     >
                                       <X size={18} />
                                     </button>
-                                    <h3 className="text-xl font-bold text-white mb-4">Listing Details</h3>
-                                    <div className="space-y-3">
-                                      <div>
-                                        <span className="text-xs font-semibold text-slate-400 uppercase">Title</span>
-                                        <div className="text-white font-semibold">{viewListing.title}</div>
+                                    <div className="flex items-start gap-4 mb-6">
+                                      <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
+                                        {viewListing.photos && viewListing.photos.length > 0 ? (
+                                          <img src={viewListing.photos[0]} alt="Waste" className="h-16 w-16 rounded-xl object-cover" />
+                                        ) : (
+                                          <Package size={24} className="text-white" />
+                                        )}
                                       </div>
-                                      <div>
-                                        <span className="text-xs font-semibold text-slate-400 uppercase">Farmer</span>
-                                        <div className="text-slate-300">{viewListing.sellerEmail}</div>
-                                      </div>
-                                      <div className="flex gap-4">
-                                        <div>
-                                          <span className="text-xs font-semibold text-slate-400 uppercase">Category</span>
-                                          <div className="text-slate-300">{viewListing.category}</div>
+                                      <div className="flex-1 min-w-0">
+                                        <h3 className="text-xl font-bold text-white mb-1">{viewListing.title}</h3>
+                                        <div className="flex items-center gap-2 text-sm text-slate-400 mb-2">
+                                          <User size={14} />
+                                          <span>{viewListing.sellerEmail}</span>
+                                          {viewListing.location?.address && (
+                                            <>
+                                              <span>•</span>
+                                              <MapPin size={14} />
+                                              <span className="truncate">{viewListing.location.address}</span>
+                                            </>
+                                          )}
                                         </div>
-                                        <div>
-                                          <span className="text-xs font-semibold text-slate-400 uppercase">Quantity</span>
-                                          <div className="text-slate-300">{viewListing.quantity} MT</div>
-                                        </div>
-                                        <div>
-                                          <span className="text-xs font-semibold text-slate-400 uppercase">Price</span>
-                                          <div className="text-emerald-400 font-semibold"><span style={{fontFamily: 'Arial'}}>₹</span>{viewListing.price}</div>
+                                        <div className="flex items-center gap-4 text-sm">
+                                          <span className="text-slate-300">{viewListing.quantity} MT</span>
+                                          <span className="text-emerald-400 font-semibold"><span style={{fontFamily: 'Arial'}}>₹</span>{viewListing.price}/MT</span>
+                                          <span className={`text-xs font-bold uppercase px-2 py-1 rounded-full border ${statusColors[viewListing.status || 'OPEN']}`}>
+                                            {viewListing.status || 'OPEN'}
+                                          </span>
                                         </div>
                                       </div>
-                                      <div>
-                                        <span className="text-xs font-semibold text-slate-400 uppercase">Description</span>
-                                        <div className="text-slate-300">{viewListing.description}</div>
-                                      </div>
-                                      <div>
-                                        <span className="text-xs font-semibold text-slate-400 uppercase">Status</span>
-                                        <div className="text-xs font-bold uppercase px-2 py-1 rounded-full border inline-block mt-1 mb-2 " style={{ borderColor: '#10b981', color: '#10b981' }}>{viewListing.status || 'OPEN'}</div>
-                                      </div>
-                                      {viewListing.photos && viewListing.photos.length > 0 && (
-                                        <div>
-                                          <span className="text-xs font-semibold text-slate-400 uppercase">Photos</span>
-                                          <div className="flex flex-wrap gap-2 mt-2">
-                                            {viewListing.photos.map((url: string, idx: number) => (
-                                              <img key={idx} src={url} alt="Waste" className="h-20 w-20 object-cover rounded-lg border border-white/10" />
-                                            ))}
-                                          </div>
+                                    </div>
+
+                                    {/* Photos Section - Prominent */}
+                                    {viewListing.photos && viewListing.photos.length > 0 && (
+                                      <div className="mb-6">
+                                        <div className="flex items-center gap-2 mb-3">
+                                          <ImageIcon size={16} className="text-emerald-400" />
+                                          <span className="text-sm font-semibold text-slate-300 uppercase">Photos ({viewListing.photos.length})</span>
                                         </div>
-                                      )}
-                                      {viewListing.location && (
-                                        <div>
-                                          <span className="text-xs font-semibold text-slate-400 uppercase">Pickup Location</span>
-                                          <div className="text-slate-300 mt-1">
-                                            {viewListing.location.address && <div>{viewListing.location.address}</div>}
-                                            {viewListing.location.latitude && viewListing.location.longitude && (
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                          {viewListing.photos.map((url: string, idx: number) => (
+                                            <div key={idx} className="relative group">
+                                              <img
+                                                src={url}
+                                                alt={`Waste photo ${idx + 1}`}
+                                                className="w-full h-24 object-cover rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors"
+                                              />
+                                              <a
+                                                href={url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center"
+                                              >
+                                                <span className="text-white text-xs font-semibold">View Full</span>
+                                              </a>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Location Section - Prominent */}
+                                    {viewListing.location && (
+                                      <div className="mb-6">
+                                        <div className="flex items-center gap-2 mb-3">
+                                          <MapPin size={16} className="text-blue-400" />
+                                          <span className="text-sm font-semibold text-slate-300 uppercase">Pickup Location</span>
+                                        </div>
+                                        <div className="bg-white/[0.02] border border-white/10 rounded-lg p-4">
+                                          {viewListing.location.address && (
+                                            <p className="text-slate-300 mb-2">{viewListing.location.address}</p>
+                                          )}
+                                          {viewListing.location.latitude && viewListing.location.longitude && (
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-xs text-slate-400">
+                                                Lat: {viewListing.location.latitude.toFixed(6)}, Lng: {viewListing.location.longitude.toFixed(6)}
+                                              </span>
                                               <a
                                                 href={`https://maps.google.com/?q=${viewListing.location.latitude},${viewListing.location.longitude}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-emerald-400 underline text-xs"
+                                                className="text-blue-400 hover:text-blue-300 underline text-sm font-semibold"
                                               >
-                                                View on Map
+                                                View on Map →
                                               </a>
-                                            )}
-                                          </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Other Details */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                      <div>
+                                        <span className="text-xs font-semibold text-slate-400 uppercase">Category</span>
+                                        <div className="text-slate-300 mt-1">{viewListing.category || 'Not specified'}</div>
+                                      </div>
+                                      <div>
+                                        <span className="text-xs font-semibold text-slate-400 uppercase">Agent</span>
+                                        <div className="text-slate-300 mt-1">{viewListing.assignedAgentEmail || 'Not assigned'}</div>
+                                      </div>
+                                      {viewListing.description && (
+                                        <div className="sm:col-span-2">
+                                          <span className="text-xs font-semibold text-slate-400 uppercase">Description</span>
+                                          <div className="text-slate-300 mt-1">{viewListing.description}</div>
                                         </div>
                                       )}
                                     </div>

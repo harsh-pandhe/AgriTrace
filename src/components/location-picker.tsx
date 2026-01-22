@@ -232,3 +232,5 @@ export function LocationPicker({
         </div>
     );
 }
+
+export default LocationPicker;

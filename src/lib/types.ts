@@ -158,7 +158,7 @@ export interface Listing {
   sellerId?: string;
   sellerEmail?: string;
   description?: string;
-  img?: string;
+  photos?: string[];
   status?: ListingStatus;
   assignedAgentId?: string;
   assignedAgentEmail?: string;

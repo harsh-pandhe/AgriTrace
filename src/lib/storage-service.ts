@@ -2,8 +2,7 @@
  * Storage Service - Handles file uploads to Firebase Storage
  */
 
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { storage } from './firebase';
+import { uploadToCloudinary } from './cloudinary-upload';
 
 export interface UploadProgress {
     loaded: number;
@@ -29,18 +28,8 @@ export const uploadWastePhoto = async (
             // 5MB limit
             throw new Error('File size must be less than 5MB');
         }
-
-        const fileName = `${Date.now()}-${file.name}`;
-        const fileRef = ref(
-            storage,
-            `waste-reports/${userId}/${wasteReportId}/${fileName}`
-        );
-
-        const snapshot = await uploadBytes(fileRef, file, {
-            contentType: file.type,
-        });
-
-        return await getDownloadURL(snapshot.ref);
+        // Upload to Cloudinary
+        return await uploadToCloudinary(file);
     } catch (error) {
         throw new Error(
             `Failed to upload photo: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -68,20 +57,9 @@ export const uploadMultiplePhotos = async (
  * Delete photo from storage
  */
 export const deleteWastePhoto = async (photoURL: string): Promise<void> => {
-    try {
-        // Extract the path from the download URL
-        const decodedURL = decodeURIComponent(photoURL);
-        const startIndex = decodedURL.indexOf('/o/') + 3;
-        const endIndex = decodedURL.indexOf('?');
-        const filePath = decodedURL.substring(startIndex, endIndex);
-
-        const fileRef = ref(storage, filePath);
-        await deleteObject(fileRef);
-    } catch (error) {
-        throw new Error(
-            `Failed to delete photo: ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
-    }
+    // Cloudinary unsigned uploads cannot be deleted via API
+    // Deletion must be done manually from Cloudinary dashboard
+    console.warn('Photo deletion not supported for Cloudinary uploads. Delete manually from dashboard.');
 };
 
 /**
