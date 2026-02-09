@@ -305,7 +305,13 @@ function FarmerDashboard({ user, listings }: any) {
                     return (
                       <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-white/[0.02] rounded-xl border border-white/5 hover:bg-white/[0.05] hover:border-emerald-500/20 transition-all duration-300 gap-4">
                         <div className="flex items-center gap-4 flex-1">
-                          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20 flex items-center justify-center text-2xl flex-shrink-0">🌾</div>
+                          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20 flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden">
+                            {item.photos && item.photos.length > 0 ? (
+                              <img src={item.photos[0]} alt="Waste" className="h-full w-full object-cover" />
+                            ) : (
+                              <span>🌾</span>
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-white truncate">{item.title}</h3>
                             <p className="text-xs sm:text-sm text-slate-400">{item.category} • {item.quantity}MT</p>
@@ -390,7 +396,13 @@ function FarmerDashboard({ user, listings }: any) {
                         || null;
                       return (
                         <div key={item.id} className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-xl border border-white/5">
-                          <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-sm">🌾</div>
+                          <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-sm overflow-hidden">
+                            {item.photos && item.photos.length > 0 ? (
+                              <img src={item.photos[0]} alt="Waste" className="h-full w-full object-cover" />
+                            ) : (
+                              <span>🌾</span>
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm text-white truncate">{item.title}</p>
                             <p className="text-[10px] text-slate-500">{item.quantity}MT</p>
@@ -481,9 +493,16 @@ function FarmerDashboard({ user, listings }: any) {
                       />
                       <datalist id="waste-category-options">
                         <option value="Rice Husk" />
+                        <option value="Rice Residue" />
                         <option value="Wheat Stubble" />
                         <option value="Sugarcane Bagasse" />
                         <option value="Cotton Stalks" />
+                        <option value="Corn Stover" />
+                        <option value="Paddy Straw" />
+                        <option value="Coconut Shell" />
+                        <option value="Groundnut Shell" />
+                        <option value="Mustard Stalks" />
+                        <option value="Other" />
                       </datalist>
                     </div>
                     <div className="space-y-2">
@@ -630,7 +649,8 @@ function AgentDashboard({ user, listings }: any) {
   // Filter listings
   const availableListings = listings.filter((l: any) => l.status === 'OPEN' || !l.status);
   const myPickups = listings.filter((l: any) => l.assignedAgentId === user?.uid && (l.status === 'ASSIGNED' || l.status === 'IN_TRANSIT'));
-  const myDelivered = listings.filter((l: any) => l.assignedAgentId === user?.uid && l.status === 'DELIVERED');
+  const myDelivered = listings.filter((l: any) => l.assignedAgentId === user?.uid && (l.status === 'DELIVERED' || l.status === 'RECYCLED'));
+  const myRecycled = listings.filter((l: any) => l.assignedAgentId === user?.uid && l.status === 'RECYCLED');
 
   const handleClaim = async (listingId: string) => {
     setActionLoading(listingId);
@@ -704,6 +724,8 @@ function AgentDashboard({ user, listings }: any) {
     ASSIGNED: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
     IN_TRANSIT: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
     DELIVERED: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    RECYCLED: 'bg-teal-500/20 text-teal-400 border-teal-500/30',
+    CANCELLED: 'bg-red-500/20 text-red-400 border-red-500/30',
   };
 
   return (
@@ -727,10 +749,11 @@ function AgentDashboard({ user, listings }: any) {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-12">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-10 sm:mb-12">
           <StatCard icon={Package} label="Available" value={availableListings.length} sub="Open listings" gradient="from-blue-400 to-blue-600" />
           <StatCard icon={Truck} label="My Pickups" value={myPickups.length} sub="Active assignments" gradient="from-amber-400 to-amber-600" />
           <StatCard icon={Leaf} label="Delivered" value={myDelivered.length} sub="Completed" gradient="from-emerald-400 to-emerald-600" />
+          <StatCard icon={Activity} label="Recycled" value={myRecycled.length} sub="Fully processed" gradient="from-teal-400 to-teal-600" />
           <StatCard icon={DollarSign} label="Investment" value={<><span style={{fontFamily: 'Arial'}}>₹</span>{myDelivered.reduce((sum: number, l: any) => sum + (l.price * l.quantity || 0), 0)}</>} sub="Total invested" gradient="from-green-400 to-green-600" />
         </div>
 

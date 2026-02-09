@@ -118,13 +118,13 @@ export function LocationPicker({
             <Label>Location</Label>
 
             {/* Tab Toggle */}
-            <div className="flex gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+            <div className="flex gap-2 rounded-lg bg-gray-800 p-1">
                 <button
                     type="button"
                     onClick={() => setUseManualEntry(false)}
                     className={`flex-1 rounded-md px-4 py-2 font-medium text-sm transition-all ${!useManualEntry
-                        ? 'bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                        ? 'bg-gray-700 text-green-400 shadow-sm'
+                        : 'text-gray-400 hover:text-white'
                         }`}
                 >
                     <Navigation className="h-4 w-4 inline mr-2" />
@@ -134,8 +134,8 @@ export function LocationPicker({
                     type="button"
                     onClick={() => setUseManualEntry(true)}
                     className={`flex-1 rounded-md px-4 py-2 font-medium text-sm transition-all ${useManualEntry
-                        ? 'bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                        ? 'bg-gray-700 text-green-400 shadow-sm'
+                        : 'text-gray-400 hover:text-white'
                         }`}
                 >
                     <MapPin className="h-4 w-4 inline mr-2" />
@@ -157,14 +157,14 @@ export function LocationPicker({
                     </Button>
 
                     {location && (
-                        <div className="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4">
+                        <div className="rounded-lg bg-green-900/20 border border-green-800 p-4">
                             <div className="flex items-start gap-3">
-                                <MapPin className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                <MapPin className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-green-900 dark:text-green-100">
+                                    <p className="font-semibold text-white">
                                         {address}
                                     </p>
-                                    <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                                    <p className="text-sm text-emerald-300 mt-1">
                                         Latitude: {location.latitude.toFixed(6)}
                                         <br />
                                         Longitude: {location.longitude.toFixed(6)}
@@ -175,9 +175,9 @@ export function LocationPicker({
                     )}
 
                     {!location && (
-                        <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 flex gap-3">
-                            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                            <p className="text-sm text-blue-700 dark:text-blue-300">
+                        <div className="rounded-lg bg-blue-900/20 border border-blue-800 p-4 flex gap-3">
+                            <AlertCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-blue-300">
                                 Click the button above to capture your current location using GPS
                             </p>
                         </div>
@@ -198,7 +198,7 @@ export function LocationPicker({
                                     handleSearchAddress();
                                 }
                             }}
-                            className="flex-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-emerald-500/50"
+                            className="flex-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-400 focus-visible:ring-emerald-500/50 [color-scheme:dark]"
                         />
                         <Button
                             type="button"
@@ -211,14 +211,14 @@ export function LocationPicker({
                     </div>
 
                     {location && (
-                        <div className="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4">
+                        <div className="rounded-lg bg-green-900/20 border border-green-800 p-4">
                             <div className="flex items-start gap-3">
-                                <MapPin className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                <MapPin className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-green-900 dark:text-green-100">
+                                    <p className="font-semibold text-white">
                                         {address}
                                     </p>
-                                    <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                                    <p className="text-sm text-emerald-300 mt-1">
                                         Latitude: {location.latitude.toFixed(6)}
                                         <br />
                                         Longitude: {location.longitude.toFixed(6)}

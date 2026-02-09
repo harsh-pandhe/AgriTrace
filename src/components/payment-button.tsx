@@ -3,13 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
-
-declare global {
-    interface Window {
-        Razorpay: any;
-    }
-}
+import { Loader2, CheckCircle, CreditCard } from 'lucide-react';
 
 interface PaymentButtonProps {
     amount: number;
@@ -17,7 +11,7 @@ interface PaymentButtonProps {
     buyerId: string;
     sellerId: string;
     onSuccess?: (orderId: string) => void;
-    onError?: (error: any) => void;
+    onError?: (error: unknown) => void;
     children?: React.ReactNode;
 }
 
@@ -27,21 +21,13 @@ export default function PaymentButton({
     buyerId,
     sellerId,
     onSuccess,
-    onError,
+    onError: _onError,
     children,
 }: PaymentButtonProps) {
     const [loading, setLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [step, setStep] = useState<'confirm' | 'processing' | 'success'>('confirm');
     const { toast } = useToast();
-
-    const loadRazorpayScript = () => {
-        return new Promise((resolve) => {
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.onload = () => resolve(true);
-            script.onerror = () => resolve(false);
-            document.body.appendChild(script);
-        });
-    };
 
     const handlePayment = async () => {
         if (!listingId || !buyerId || !sellerId) {
@@ -62,114 +48,135 @@ export default function PaymentButton({
             return;
         }
 
+        setShowModal(true);
+        setStep('confirm');
+    };
+
+    const processPayment = async () => {
+        setStep('processing');
         setLoading(true);
 
-        try {
-            // Load Razorpay script
-            const scriptLoaded = await loadRazorpayScript();
-            if (!scriptLoaded) {
-                throw new Error('Failed to load Razorpay SDK');
-            }
+        // Simulate payment processing delay
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
-            // Create order
-            const orderResponse = await fetch('/api/razorpay/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    amount,
-                    listingId,
-                    buyerId,
-                    sellerId,
-                }),
-            });
+        const fakeOrderId = `ORD_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-            const orderData = await orderResponse.json();
+        setStep('success');
+        setLoading(false);
 
-            if (!orderResponse.ok) {
-                throw new Error(orderData.error || 'Failed to create order');
-            }
+        toast({
+            title: 'Payment Successful',
+            description: `Order ID: ${fakeOrderId}`,
+        });
 
-            // Open Razorpay checkout
-            const options = {
-                key: orderData.key_id,
-                amount: orderData.amount,
-                currency: orderData.currency,
-                name: 'AgriTrace',
-                description: 'Payment for agricultural waste collection',
-                order_id: orderData.id,
-                handler: async function (response: any) {
-                    try {
-                        // Verify payment
-                        const verifyResponse = await fetch('/api/razorpay/verify', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature,
-                                listingId,
-                                buyerId,
-                                sellerId,
-                                price: amount,
-                            }),
-                        });
+        onSuccess?.(fakeOrderId);
 
-                        const verifyData = await verifyResponse.json();
-
-                        if (verifyResponse.ok && verifyData.ok) {
-                            toast({
-                                title: 'Payment Successful',
-                                description: `Order ID: ${verifyData.orderId}`,
-                            });
-                            onSuccess?.(verifyData.orderId);
-                        } else {
-                            throw new Error(verifyData.error || 'Payment verification failed');
-                        }
-                    } catch (error: any) {
-                        toast({
-                            title: 'Verification Failed',
-                            description: error.message,
-                            variant: 'destructive',
-                        });
-                        onError?.(error);
-                    }
-                },
-                prefill: {
-                    name: 'AgriTrace User',
-                },
-                theme: {
-                    color: '#10b981',
-                },
-            };
-
-            const razorpay = new window.Razorpay(options);
-            razorpay.on('payment.failed', function (response: any) {
-                toast({
-                    title: 'Payment Failed',
-                    description: response.error.description,
-                    variant: 'destructive',
-                });
-                onError?.(response.error);
-            });
-
-            razorpay.open();
-        } catch (error: any) {
-            console.error('Payment error:', error);
-            toast({
-                title: 'Payment Error',
-                description: error.message || 'Failed to initiate payment',
-                variant: 'destructive',
-            });
-            onError?.(error);
-        } finally {
-            setLoading(false);
-        }
+        // Auto-close after success
+        setTimeout(() => {
+            setShowModal(false);
+            setStep('confirm');
+        }, 2000);
     };
 
     return (
-        <Button onClick={handlePayment} disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {children || `Pay ₹${amount}`}
-        </Button>
+        <>
+            <Button onClick={handlePayment} disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {children || `Pay ₹${amount}`}
+            </Button>
+
+            {/* Fake Payment Modal */}
+            {showModal && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { if (step === 'confirm') { setShowModal(false); } }} />
+                    <div className="relative w-full max-w-md bg-[#0a120a] rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/10 border-b border-white/5 p-6">
+                            <div className="flex items-center gap-3">
+                                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                                    <CreditCard className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-white">AgriTrace Pay</h3>
+                                    <p className="text-xs text-slate-400">Secure Payment Gateway</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6">
+                            {step === 'confirm' && (
+                                <div className="space-y-6">
+                                    <div className="text-center">
+                                        <p className="text-sm text-slate-400 mb-1">Amount to Pay</p>
+                                        <p className="text-4xl font-bold text-white">
+                                            <span style={{ fontFamily: 'Arial' }}>₹</span>{amount.toLocaleString()}
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between p-3 bg-white/[0.03] rounded-xl border border-white/5">
+                                            <span className="text-sm text-slate-400">Listing ID</span>
+                                            <span className="text-sm text-white font-mono">{listingId.slice(0, 12)}...</span>
+                                        </div>
+                                        <div className="flex justify-between p-3 bg-white/[0.03] rounded-xl border border-white/5">
+                                            <span className="text-sm text-slate-400">Method</span>
+                                            <span className="text-sm text-white">UPI / Net Banking</span>
+                                        </div>
+                                        <div className="flex justify-between p-3 bg-white/[0.03] rounded-xl border border-white/5">
+                                            <span className="text-sm text-slate-400">Status</span>
+                                            <span className="text-sm text-amber-400 font-semibold">Pending</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setShowModal(false)}
+                                            className="flex-1 border-white/10 text-slate-400 hover:bg-white/5"
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            onClick={processPayment}
+                                            className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0"
+                                        >
+                                            Confirm Payment
+                                        </Button>
+                                    </div>
+
+                                    <p className="text-[10px] text-center text-slate-500">
+                                        Demo mode — no real money is charged
+                                    </p>
+                                </div>
+                            )}
+
+                            {step === 'processing' && (
+                                <div className="text-center py-8 space-y-4">
+                                    <div className="h-16 w-16 rounded-full border-4 border-emerald-400/20 border-t-emerald-400 animate-spin mx-auto" />
+                                    <div>
+                                        <p className="text-lg font-semibold text-white">Processing Payment</p>
+                                        <p className="text-sm text-slate-400 mt-1">Please wait...</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {step === 'success' && (
+                                <div className="text-center py-8 space-y-4">
+                                    <div className="h-16 w-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
+                                        <CheckCircle className="h-10 w-10 text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-lg font-semibold text-white">Payment Successful!</p>
+                                        <p className="text-sm text-slate-400 mt-1">
+                                            <span style={{ fontFamily: 'Arial' }}>₹</span>{amount.toLocaleString()} paid successfully
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
