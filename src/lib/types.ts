@@ -197,6 +197,53 @@ export interface UserProfile {
 }
 
 /**
+ * Carbon Credit - Tracks environmental impact of waste diversion
+ */
+export interface CarbonCredit {
+  id?: string;
+  userId: string;
+  userRole: 'farmer' | 'agent' | 'admin';
+  listingId: string;
+  wasteType: string;
+  quantityMT: number;
+  carbonOffsetKg: number; // CO2 equivalent saved
+  creditDate: Timestamp | Date;
+  status: 'pending' | 'verified' | 'redeemed';
+}
+
+/**
+ * Reward - Gamification & payoff system
+ */
+export interface Reward {
+  id?: string;
+  userId: string;
+  type: 'carbon_offset' | 'waste_diverted' | 'streak' | 'milestone' | 'referral';
+  title: string;
+  description: string;
+  points: number;
+  earnedAt: Timestamp | Date;
+  redeemed: boolean;
+  redeemedAt?: Timestamp | Date;
+}
+
+/**
+ * Carbon factors per waste type (kg CO2 saved per MT of waste diverted)
+ */
+export const CARBON_FACTORS: Record<string, number> = {
+  'Rice Husk': 1320,
+  'Rice Residue': 1280,
+  'Wheat Stubble': 1150,
+  'Sugarcane Bagasse': 980,
+  'Cotton Stalks': 1050,
+  'Corn Stover': 1100,
+  'Paddy Straw': 1300,
+  'Coconut Shell': 1400,
+  'Groundnut Shell': 1200,
+  'Mustard Stalks': 1080,
+  'Other': 1000,
+};
+
+/**
  * Dashboard Statistics
  */
 export interface DashboardStats {
@@ -207,4 +254,6 @@ export interface DashboardStats {
   earnings?: number; // For farmers
   collectionsAssigned?: number; // For agents
   wasteProcessed?: number; // For recyclers
+  carbonOffsetKg?: number; // Total carbon offset
+  rewardPoints?: number; // Total reward points
 }

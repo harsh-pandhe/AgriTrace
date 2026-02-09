@@ -1,5 +1,5 @@
 import { initializeApp, getApps, cert, App, applicationDefault } from 'firebase-admin/app';
-import { getFirestore, Firestore } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 
 // Server-side Firebase Admin initialization
 function initializeFirebaseAdmin(): App {
@@ -10,7 +10,9 @@ function initializeFirebaseAdmin(): App {
   // Option 1: Use service account JSON from environment variable
   if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     try {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+      // Replace escaped newlines in the private key before parsing
+      const raw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY.replace(/\n/g, '\\n');
+      const serviceAccount = JSON.parse(raw);
       return initializeApp({
         credential: cert(serviceAccount),
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,

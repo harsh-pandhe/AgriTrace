@@ -2,7 +2,7 @@
  * Storage Service - Handles file uploads to Firebase Storage
  */
 
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from './firebase';
 import { uploadToCloudinary } from './cloudinary-upload';
 
@@ -58,7 +58,7 @@ export const uploadMultiplePhotos = async (
 /**
  * Delete photo from storage
  */
-export const deleteWastePhoto = async (photoURL: string): Promise<void> => {
+export const deleteWastePhoto = async (_photoURL: string): Promise<void> => {
     // Cloudinary unsigned uploads cannot be deleted via API
     // Deletion must be done manually from Cloudinary dashboard
     console.warn('Photo deletion not supported for Cloudinary uploads. Delete manually from dashboard.');

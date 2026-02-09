@@ -198,7 +198,7 @@ export function LocationPicker({
                                     handleSearchAddress();
                                 }
                             }}
-                            className="flex-1"
+                            className="flex-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-emerald-500/50"
                         />
                         <Button
                             type="button"

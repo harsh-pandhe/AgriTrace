@@ -11,6 +11,8 @@ import type { Listing } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import LocationPicker from '@/components/location-picker';
 import { PhotoUploader } from '@/components/photo-uploader';
+import PaymentButton from '@/components/payment-button';
+import { CarbonRewardsPanel } from '@/components/dashboard/carbon-rewards-panel';
 import type { Location } from '@/lib/location-service';
 import {
   Leaf,
@@ -433,6 +435,9 @@ function FarmerDashboard({ user, listings }: any) {
                 </div>
               </div>
             </div>
+
+            {/* Carbon & Rewards */}
+            <CarbonRewardsPanel userId={user?.uid || ''} listings={userListings} />
           </div>
         </div>
       </main>
@@ -466,16 +471,20 @@ function FarmerDashboard({ user, listings }: any) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Category</label>
-                      <select
+                      <input
                         name="category"
-                        defaultValue="rice"
-                        className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all"
-                      >
-                        <option value="rice" className="bg-[#0a120a]">Rice Husk</option>
-                        <option value="wheat" className="bg-[#0a120a]">Wheat Stubble</option>
-                        <option value="sugarcane" className="bg-[#0a120a]">Sugarcane Bagasse</option>
-                        <option value="cotton" className="bg-[#0a120a]">Cotton Stalks</option>
-                      </select>
+                        type="text"
+                        list="waste-category-options"
+                        placeholder="e.g., Rice Husk"
+                        className="w-full h-12 sm:h-14 bg-white/[0.04] border border-white/10 rounded-xl px-4 text-sm text-white font-medium placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all"
+                        required
+                      />
+                      <datalist id="waste-category-options">
+                        <option value="Rice Husk" />
+                        <option value="Wheat Stubble" />
+                        <option value="Sugarcane Bagasse" />
+                        <option value="Cotton Stalks" />
+                      </datalist>
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Quantity (MT)</label>
@@ -722,7 +731,7 @@ function AgentDashboard({ user, listings }: any) {
           <StatCard icon={Package} label="Available" value={availableListings.length} sub="Open listings" gradient="from-blue-400 to-blue-600" />
           <StatCard icon={Truck} label="My Pickups" value={myPickups.length} sub="Active assignments" gradient="from-amber-400 to-amber-600" />
           <StatCard icon={Leaf} label="Delivered" value={myDelivered.length} sub="Completed" gradient="from-emerald-400 to-emerald-600" />
-          <StatCard icon={DollarSign} label="Earnings" value={<><span style={{fontFamily: 'Arial'}}>₹</span>{myDelivered.reduce((sum: number, l: any) => sum + (l.price * l.quantity || 0), 0)}</>} sub="Total earned" gradient="from-green-400 to-green-600" />
+          <StatCard icon={DollarSign} label="Investment" value={<><span style={{fontFamily: 'Arial'}}>₹</span>{myDelivered.reduce((sum: number, l: any) => sum + (l.price * l.quantity || 0), 0)}</>} sub="Total invested" gradient="from-green-400 to-green-600" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -739,7 +748,13 @@ function AgentDashboard({ user, listings }: any) {
                 {availableListings.map((item: any) => (
                   <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-white/[0.02] rounded-xl border border-blue-500/10 hover:bg-blue-500/5 hover:border-blue-500/20 transition-all duration-300 gap-4">
                     <div className="flex items-center gap-4 flex-1">
-                      <div className="h-12 w-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl flex-shrink-0">🌾</div>
+                      <div className="h-12 w-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl flex-shrink-0 overflow-hidden">
+                        {item.photos && item.photos.length > 0 ? (
+                          <img src={item.photos[0]} alt="Waste" className="h-full w-full object-cover" />
+                        ) : (
+                          <span>🌾</span>
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-white truncate">{item.title}</h3>
                         <p className="text-xs sm:text-sm text-slate-400">{item.category} • {item.quantity}MT</p>
@@ -785,7 +800,13 @@ function AgentDashboard({ user, listings }: any) {
                   return (
                     <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-white/[0.02] rounded-xl border border-amber-500/10 hover:bg-amber-500/5 hover:border-amber-500/20 transition-all duration-300 gap-4">
                       <div className="flex items-center gap-4 flex-1">
-                        <div className="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl flex-shrink-0">📦</div>
+                        <div className="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl flex-shrink-0 overflow-hidden">
+                          {item.photos && item.photos.length > 0 ? (
+                            <img src={item.photos[0]} alt="Waste" className="h-full w-full object-cover" />
+                          ) : (
+                            <span>📦</span>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-white truncate">{item.title}</h3>
                           <p className="text-xs sm:text-sm text-slate-400">{item.category} • {item.quantity}MT</p>
@@ -854,6 +875,11 @@ function AgentDashboard({ user, listings }: any) {
             </div>
           </div>
         )}
+
+        {/* Carbon & Rewards for Agent */}
+        <div className="mt-6">
+          <CarbonRewardsPanel userId={user?.uid || ''} listings={listings.filter((l: any) => l.assignedAgentId === user?.uid)} />
+        </div>
       </main>
     </div>
   );
@@ -887,6 +913,9 @@ function AdminDashboard({ user, listings }: any) {
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Failed to mark as recycled');
       toast({ title: 'Success', description: 'Listing marked as recycled!' });
+      if (viewListing?.id === listingId) {
+        setViewListing({ ...viewListing, status: 'RECYCLED' });
+      }
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -1447,6 +1476,32 @@ function AdminDashboard({ user, listings }: any) {
                                               </a>
                                             </div>
                                           )}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {(viewListing.status === 'DELIVERED' || viewListing.status === 'RECYCLED') && viewListing.sellerId && user?.uid && (
+                                      <div className="mb-6">
+                                        <div className="flex items-center gap-2 mb-3">
+                                          <DollarSign size={16} className="text-emerald-400" />
+                                          <span className="text-sm font-semibold text-slate-300 uppercase">Payment</span>
+                                        </div>
+                                        <div className="bg-white/[0.02] border border-white/10 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                          <div>
+                                            <p className="text-sm text-slate-300">Settlement amount</p>
+                                            <p className="text-lg font-bold text-emerald-400">
+                                              <span style={{fontFamily: 'Arial'}}>₹</span>
+                                              {(Number(viewListing.price || 0) * Number(viewListing.quantity || 0)).toLocaleString()}
+                                            </p>
+                                          </div>
+                                          <PaymentButton
+                                            amount={Number(viewListing.price || 0) * Number(viewListing.quantity || 0)}
+                                            listingId={viewListing.id}
+                                            buyerId={user.uid}
+                                            sellerId={viewListing.sellerId}
+                                          >
+                                            Pay Farmer
+                                          </PaymentButton>
                                         </div>
                                       </div>
                                     )}
