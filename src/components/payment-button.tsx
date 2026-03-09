@@ -85,28 +85,36 @@ export default function PaymentButton({
                     description: `Payment for listing ${listingId.slice(0, 8)}`,
                     order_id: order.id,
                     handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
-                        // Verify on server
-                        const verifyRes = await fetch('/api/razorpay/verify', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                ...response,
-                                listingId,
-                                buyerId,
-                                sellerId,
-                                price: amount,
-                            }),
-                        });
-                        const verifyData = await verifyRes.json();
+                        try {
+                            // Verify on server
+                            const verifyRes = await fetch('/api/razorpay/verify', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    ...response,
+                                    listingId,
+                                    buyerId,
+                                    sellerId,
+                                    price: amount,
+                                }),
+                            });
+                            const verifyData = await verifyRes.json();
 
-                        if (verifyRes.ok && verifyData.ok) {
-                            setStep('success');
+                            if (verifyRes.ok && verifyData.ok) {
+                                setStep('success');
+                                setLoading(false);
+                                toast({ title: 'Payment Successful', description: `Order ID: ${verifyData.orderId}` });
+                                onSuccess?.(verifyData.orderId);
+                                setTimeout(() => { setShowModal(false); setStep('confirm'); }, 2000);
+                            } else {
+                                setStep('confirm');
+                                setLoading(false);
+                                toast({ title: 'Verification Failed', description: verifyData.error || 'Could not verify payment.', variant: 'destructive' });
+                            }
+                        } catch {
+                            setStep('confirm');
                             setLoading(false);
-                            toast({ title: 'Payment Successful', description: `Order ID: ${verifyData.orderId}` });
-                            onSuccess?.(verifyData.orderId);
-                            setTimeout(() => { setShowModal(false); setStep('confirm'); }, 2000);
-                        } else {
-                            throw new Error(verifyData.error || 'Verification failed');
+                            toast({ title: 'Payment Error', description: 'Something went wrong during verification.', variant: 'destructive' });
                         }
                     },
                     modal: {
