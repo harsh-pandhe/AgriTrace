@@ -8,7 +8,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const key = process.env.RAZORPAY_KEY_ID;
+    const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
     const secret = process.env.RAZORPAY_KEY_SECRET;
     if (!key || !secret) {
       return NextResponse.json({ error: 'Razorpay keys not configured' }, { status: 500 });

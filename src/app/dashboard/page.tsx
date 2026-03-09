@@ -36,6 +36,7 @@ import {
   Phone,
   User,
   Image as ImageIcon,
+  CreditCard,
 } from 'lucide-react';
 
 // ============ HEADER ============
@@ -67,7 +68,7 @@ function DashboardHeader({ user, userRole, onLogout }: any) {
           </div>
 
           <div className="relative">
-            <button 
+            <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="h-11 w-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white text-sm hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-300 hover:scale-105"
             >
@@ -99,7 +100,7 @@ function DashboardHeader({ user, userRole, onLogout }: any) {
                     </div>
                     <span>Home</span>
                   </Link>
-                  <button 
+                  <button
                     onClick={() => {
                       setMenuOpen(false);
                       onLogout();
@@ -226,7 +227,7 @@ function FarmerDashboard({ user, listings }: any) {
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <button onClick={() => {
-              const headers = ['Title','Category','Quantity','Price','Status','Agent Email','Created At','Updated At'];
+              const headers = ['Title', 'Category', 'Quantity', 'Price', 'Status', 'Agent Email', 'Created At', 'Updated At'];
               const toDate = (ts: any) => {
                 if (!ts) return null;
                 try {
@@ -244,7 +245,7 @@ function FarmerDashboard({ user, listings }: any) {
                   item.category || '',
                   item.quantity ?? '',
                   item.price ?? '',
-                  (item.status || 'OPEN').replace('_',' '),
+                  (item.status || 'OPEN').replace('_', ' '),
                   item.assignedAgentEmail || '',
                   created ? created.toISOString() : '',
                   updated ? updated.toISOString() : '',
@@ -273,7 +274,7 @@ function FarmerDashboard({ user, listings }: any) {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-12">
-          <StatCard icon={DollarSign} label="Total Earnings" value={<><span style={{fontFamily: 'Arial'}}>₹</span>{userListings.filter((l: any) => l.status === 'DELIVERED' || l.status === 'RECYCLED').reduce((sum: number, l: any) => sum + (l.price * l.quantity || 0), 0)}</>} sub="Completed listings" gradient="from-emerald-400 to-emerald-600" />
+          <StatCard icon={DollarSign} label="Total Earnings" value={<><span style={{ fontFamily: 'Arial' }}>₹</span>{userListings.filter((l: any) => l.status === 'DELIVERED' || l.status === 'RECYCLED').reduce((sum: number, l: any) => sum + (l.price * l.quantity || 0), 0)}</>} sub="Completed listings" gradient="from-emerald-400 to-emerald-600" />
           <StatCard icon={Package} label="Active Listings" value={userListings.filter((l: any) => l.status === 'OPEN').length} sub="Awaiting pickup" gradient="from-blue-400 to-blue-600" />
           <StatCard icon={Truck} label="In Progress" value={userListings.filter((l: any) => l.status === 'IN_TRANSIT' || l.status === 'ASSIGNED' || l.status === 'DELIVERED').length} sub="Being processed" gradient="from-purple-400 to-purple-600" />
           <StatCard icon={Leaf} label="Recycled" value={userListings.filter((l: any) => l.status === 'RECYCLED').length} sub="Fully processed" gradient="from-teal-400 to-teal-600" />
@@ -327,7 +328,7 @@ function FarmerDashboard({ user, listings }: any) {
                           <span className={`text-[10px] font-bold uppercase px-3 py-1 rounded-full border ${statusColors[status]}`}>
                             {status.replace('_', ' ')}
                           </span>
-                          <p className="font-bold text-emerald-400 text-lg"><span style={{fontFamily: 'Arial'}}>₹</span>{item.price}</p>
+                          <p className="font-bold text-emerald-400 text-lg"><span style={{ fontFamily: 'Arial' }}>₹</span>{item.price}</p>
                           {(status === 'OPEN' || !item.status) && (
                             <button
                               onClick={() => handleCancel(item.id)}
@@ -408,7 +409,7 @@ function FarmerDashboard({ user, listings }: any) {
                             <p className="text-[10px] text-slate-500">{item.quantity}MT</p>
                           </div>
                           <div className="text-right">
-                            <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[status]}`}>{status.replace('_',' ')}</span>
+                            <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[status]}`}>{status.replace('_', ' ')}</span>
                             <p className="text-[10px] text-slate-500 mt-1">{when ? when.toLocaleDateString() : '-'}</p>
                           </div>
                         </div>
@@ -448,6 +449,38 @@ function FarmerDashboard({ user, listings }: any) {
               </div>
             </div>
 
+            {/* Demo Payment (Razorpay) */}
+            <div className={`bg-gradient-to-br from-emerald-500/[0.06] to-teal-500/[0.03] backdrop-blur-sm rounded-2xl border border-emerald-500/20 p-4 sm:p-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`} style={{ transitionDelay: '450ms' }}>
+              <h3 className="font-bold text-white mb-1.5 sm:mb-2 flex items-center gap-2 text-sm sm:text-base">
+                <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
+                  <CreditCard size={16} className="text-white sm:w-[18px] sm:h-[18px]" />
+                </div>
+                Test Payment
+              </h3>
+              <p className="text-[10px] sm:text-xs text-slate-400 mb-3 sm:mb-4 leading-relaxed">Try out the Razorpay checkout flow. No real money is charged in test mode.</p>
+              <div className="bg-white/[0.03] border border-white/5 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs sm:text-sm text-slate-400">Demo amount</p>
+                  <p className="text-xl sm:text-2xl font-bold text-emerald-400"><span style={{ fontFamily: 'Arial' }}>₹</span>100</p>
+                </div>
+              </div>
+              <PaymentButton
+                amount={100}
+                listingId="demo_listing_001"
+                buyerId={user?.uid || 'demo_buyer'}
+                sellerId="demo_seller"
+                onSuccess={(orderId) => {
+                  console.log('Demo payment success:', orderId);
+                }}
+              >
+                Pay ₹100 (Demo)
+              </PaymentButton>
+              <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 bg-white/[0.02] border border-white/5 rounded-lg">
+                <p className="text-[10px] sm:text-[11px] text-slate-500 text-center">Test card: <span className="font-mono text-slate-400">4111 1111 1111 1111</span></p>
+                <p className="text-[10px] sm:text-[11px] text-slate-500 text-center mt-0.5">Any future expiry &bull; Any CVV</p>
+              </div>
+            </div>
+
             {/* Carbon & Rewards */}
             <CarbonRewardsPanel userId={user?.uid || ''} listings={userListings} />
           </div>
@@ -476,7 +509,7 @@ function FarmerDashboard({ user, listings }: any) {
             <div className="flex-1 overflow-y-auto max-h-[75vh] p-4 sm:p-6 md:p-8">
               <form onSubmit={handlePostSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Basic Info Section */}
-                  <div className="space-y-4">
+                <div className="space-y-4">
                   <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Basic Information</h3>
 
                   {/* Category and Quantity - Responsive Grid */}
@@ -533,7 +566,7 @@ function FarmerDashboard({ user, listings }: any) {
                   {/* Price */}
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-                      Price (<span style={{fontFamily: 'Arial'}}>₹</span>/MT)
+                      Price (<span style={{ fontFamily: 'Arial' }}>₹</span>/MT)
                     </label>
                     <input
                       name="price"
@@ -754,7 +787,7 @@ function AgentDashboard({ user, listings }: any) {
           <StatCard icon={Truck} label="My Pickups" value={myPickups.length} sub="Active assignments" gradient="from-amber-400 to-amber-600" />
           <StatCard icon={Leaf} label="Delivered" value={myDelivered.length} sub="Completed" gradient="from-emerald-400 to-emerald-600" />
           <StatCard icon={Activity} label="Recycled" value={myRecycled.length} sub="Fully processed" gradient="from-teal-400 to-teal-600" />
-          <StatCard icon={DollarSign} label="Investment" value={<><span style={{fontFamily: 'Arial'}}>₹</span>{myDelivered.reduce((sum: number, l: any) => sum + (l.price * l.quantity || 0), 0)}</>} sub="Total invested" gradient="from-green-400 to-green-600" />
+          <StatCard icon={DollarSign} label="Investment" value={<><span style={{ fontFamily: 'Arial' }}>₹</span>{myDelivered.reduce((sum: number, l: any) => sum + (l.price * l.quantity || 0), 0)}</>} sub="Total invested" gradient="from-green-400 to-green-600" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -785,7 +818,7 @@ function AgentDashboard({ user, listings }: any) {
                       </div>
                     </div>
                     <div className="flex sm:flex-col items-center sm:items-end gap-3">
-                      <p className="font-bold text-emerald-400"><span style={{fontFamily: 'Arial'}}>₹</span>{item.price}/MT</p>
+                      <p className="font-bold text-emerald-400"><span style={{ fontFamily: 'Arial' }}>₹</span>{item.price}/MT</p>
                       <button
                         onClick={() => handleClaim(item.id)}
                         disabled={actionLoading === item.id}
@@ -840,7 +873,7 @@ function AgentDashboard({ user, listings }: any) {
                         <span className={`text-[10px] font-bold uppercase px-3 py-1 rounded-full border ${statusColors[status]}`}>
                           {status.replace('_', ' ')}
                         </span>
-                        <p className="font-bold text-emerald-400"><span style={{fontFamily: 'Arial'}}>₹</span>{item.price}/MT</p>
+                        <p className="font-bold text-emerald-400"><span style={{ fontFamily: 'Arial' }}>₹</span>{item.price}/MT</p>
                         {status === 'ASSIGNED' && (
                           <button
                             onClick={() => handleStart(item.id)}
@@ -891,7 +924,7 @@ function AgentDashboard({ user, listings }: any) {
                   <div className="h-10 w-10 rounded-lg bg-emerald-500/20 flex items-center justify-center text-lg">✅</div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-white text-sm truncate">{item.title}</p>
-                    <p className="text-xs text-slate-400">{item.quantity}MT • <span style={{fontFamily: 'Arial'}}>₹</span>{item.price * item.quantity}</p>
+                    <p className="text-xs text-slate-400">{item.quantity}MT • <span style={{ fontFamily: 'Arial' }}>₹</span>{item.price * item.quantity}</p>
                   </div>
                 </div>
               ))}
@@ -1077,7 +1110,7 @@ function AdminDashboard({ user, listings }: any) {
           <StatCard icon={Truck} label="Agents" value={loadingStats ? '...' : (adminStats?.agents || 0)} sub="Collectors" gradient="from-amber-400 to-amber-600" />
           <StatCard icon={Package} label="Total Listings" value={listingStats.total} sub="All time" gradient="from-purple-400 to-purple-600" />
           <StatCard icon={BarChart3} label="Volume" value={`${listingStats.totalVolume.toFixed(1)} MT`} sub="Total waste" gradient="from-teal-400 to-teal-600" />
-          <StatCard icon={DollarSign} label="Value" value={<><span style={{fontFamily: 'Arial'}}>₹</span>{listingStats.totalValue.toLocaleString()}</>} sub="Platform GMV" gradient="from-green-400 to-green-600" />
+          <StatCard icon={DollarSign} label="Value" value={<><span style={{ fontFamily: 'Arial' }}>₹</span>{listingStats.totalValue.toLocaleString()}</>} sub="Platform GMV" gradient="from-green-400 to-green-600" />
         </div>
 
         {/* Status Pills */}
@@ -1160,7 +1193,7 @@ function AdminDashboard({ user, listings }: any) {
                                 </>
                               )}
                               <span>•</span>
-                              <span>{item.quantity}MT • <span style={{fontFamily: 'Arial'}}>₹</span>{item.price}/MT</span>
+                              <span>{item.quantity}MT • <span style={{ fontFamily: 'Arial' }}>₹</span>{item.price}/MT</span>
                               {item.photos && item.photos.length > 0 && (
                                 <>
                                   <span>•</span>
@@ -1253,7 +1286,7 @@ function AdminDashboard({ user, listings }: any) {
                   </div>
                   <div className="flex justify-between p-3 bg-white/[0.02] rounded-xl border border-white/5">
                     <span className="text-slate-400">Avg. Listing Value</span>
-                    <span className="font-bold text-white"><span style={{fontFamily: 'Arial'}}>₹</span>{listingStats.total > 0 ? Math.round(listingStats.totalValue / listingStats.total).toLocaleString() : 0}</span>
+                    <span className="font-bold text-white"><span style={{ fontFamily: 'Arial' }}>₹</span>{listingStats.total > 0 ? Math.round(listingStats.totalValue / listingStats.total).toLocaleString() : 0}</span>
                   </div>
                   <div className="flex justify-between p-3 bg-white/[0.02] rounded-xl border border-white/5">
                     <span className="text-slate-400">Active Rate</span>
@@ -1306,263 +1339,263 @@ function AdminDashboard({ user, listings }: any) {
               const filteredListings = listings.filter((item: any) => {
                 const status = item.status || 'OPEN';
                 const matchesStatus = statusFilter === 'ALL' || status === statusFilter;
-                const matchesSearch = !searchQuery || 
+                const matchesSearch = !searchQuery ||
                   item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   item.sellerEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   item.assignedAgentEmail?.toLowerCase().includes(searchQuery.toLowerCase());
                 return matchesStatus && matchesSearch;
               });
               return filteredListings.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-white/[0.02]">
-                    <tr>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Title</th>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden md:table-cell">Farmer</th>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden lg:table-cell">Category</th>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Qty</th>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Price</th>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden xl:table-cell">Location</th>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden lg:table-cell">Agent</th>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Status</th>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Media</th>
-                      <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredListings.map((item: any) => {
-                      const status = item.status || 'OPEN';
-                      return (
-                        <tr key={item.id} className="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
-                          <td className="p-3 sm:p-4">
-                            <p className="font-semibold text-sm text-white truncate max-w-[120px] sm:max-w-none">{item.title}</p>
-                          </td>
-                          <td className="p-3 sm:p-4 hidden md:table-cell">
-                            <p className="text-sm text-slate-400 truncate max-w-[150px]">{item.sellerEmail}</p>
-                          </td>
-                          <td className="p-3 sm:p-4 hidden lg:table-cell">
-                            <p className="text-sm text-slate-400">{item.category || '-'}</p>
-                          </td>
-                          <td className="p-3 sm:p-4">
-                            <p className="font-semibold text-sm text-white">{item.quantity} MT</p>
-                          </td>
-                          <td className="p-3 sm:p-4">
-                            <p className="font-semibold text-emerald-400"><span style={{fontFamily: 'Arial'}}>₹</span>{item.price}</p>
-                          </td>
-                          <td className="p-3 sm:p-4 hidden xl:table-cell">
-                            <div className="flex items-center gap-2">
-                              {item.location?.address ? (
-                                <div className="flex items-center gap-1">
-                                  <MapPin size={12} className="text-slate-400" />
-                                  <span className="text-sm text-slate-400 truncate max-w-[120px]" title={item.location.address}>
-                                    {item.location.address}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="text-sm text-slate-500">-</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="p-3 sm:p-4 hidden lg:table-cell">
-                            <p className="text-sm text-slate-400 truncate max-w-[150px]">{item.assignedAgentEmail || '-'}</p>
-                          </td>
-                          <td className="p-3 sm:p-4">
-                            <span className={`text-[9px] sm:text-[10px] font-bold uppercase px-2 sm:px-3 py-1 rounded-full border ${statusColors[status]}`}>
-                              {status.replace('_', ' ')}
-                            </span>
-                          </td>
-                          <td className="p-3 sm:p-4">
-                            <div className="flex items-center gap-2">
-                              {item.photos && item.photos.length > 0 ? (
-                                <div className="flex items-center gap-1">
-                                  <ImageIcon size={14} className="text-emerald-400" />
-                                  <span className="text-xs text-emerald-400 font-semibold">{item.photos.length}</span>
-                                </div>
-                              ) : (
-                                <span className="text-xs text-slate-500">-</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="p-3 sm:p-4 flex gap-2">
-                            <button
-                              onClick={() => setViewListing(item)}
-                              className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-blue-500 to-teal-500 text-white text-[9px] sm:text-[10px] font-semibold uppercase rounded-lg hover:from-blue-400 hover:to-teal-400 transition-all shadow-lg shadow-blue-500/10"
-                            >
-                              View
-                            </button>
-                            {status === 'DELIVERED' && (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-white/[0.02]">
+                      <tr>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Title</th>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden md:table-cell">Farmer</th>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden lg:table-cell">Category</th>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Qty</th>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Price</th>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden xl:table-cell">Location</th>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 hidden lg:table-cell">Agent</th>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Status</th>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Media</th>
+                        <th className="text-left p-3 sm:p-4 text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredListings.map((item: any) => {
+                        const status = item.status || 'OPEN';
+                        return (
+                          <tr key={item.id} className="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
+                            <td className="p-3 sm:p-4">
+                              <p className="font-semibold text-sm text-white truncate max-w-[120px] sm:max-w-none">{item.title}</p>
+                            </td>
+                            <td className="p-3 sm:p-4 hidden md:table-cell">
+                              <p className="text-sm text-slate-400 truncate max-w-[150px]">{item.sellerEmail}</p>
+                            </td>
+                            <td className="p-3 sm:p-4 hidden lg:table-cell">
+                              <p className="text-sm text-slate-400">{item.category || '-'}</p>
+                            </td>
+                            <td className="p-3 sm:p-4">
+                              <p className="font-semibold text-sm text-white">{item.quantity} MT</p>
+                            </td>
+                            <td className="p-3 sm:p-4">
+                              <p className="font-semibold text-emerald-400"><span style={{ fontFamily: 'Arial' }}>₹</span>{item.price}</p>
+                            </td>
+                            <td className="p-3 sm:p-4 hidden xl:table-cell">
+                              <div className="flex items-center gap-2">
+                                {item.location?.address ? (
+                                  <div className="flex items-center gap-1">
+                                    <MapPin size={12} className="text-slate-400" />
+                                    <span className="text-sm text-slate-400 truncate max-w-[120px]" title={item.location.address}>
+                                      {item.location.address}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-sm text-slate-500">-</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3 sm:p-4 hidden lg:table-cell">
+                              <p className="text-sm text-slate-400 truncate max-w-[150px]">{item.assignedAgentEmail || '-'}</p>
+                            </td>
+                            <td className="p-3 sm:p-4">
+                              <span className={`text-[9px] sm:text-[10px] font-bold uppercase px-2 sm:px-3 py-1 rounded-full border ${statusColors[status]}`}>
+                                {status.replace('_', ' ')}
+                              </span>
+                            </td>
+                            <td className="p-3 sm:p-4">
+                              <div className="flex items-center gap-2">
+                                {item.photos && item.photos.length > 0 ? (
+                                  <div className="flex items-center gap-1">
+                                    <ImageIcon size={14} className="text-emerald-400" />
+                                    <span className="text-xs text-emerald-400 font-semibold">{item.photos.length}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-slate-500">-</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3 sm:p-4 flex gap-2">
                               <button
-                                onClick={() => handleRecycle(item.id)}
-                                disabled={recyclingId === item.id}
-                                className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-teal-500 to-teal-600 text-white text-[9px] sm:text-[10px] font-semibold uppercase rounded-lg hover:from-teal-400 hover:to-teal-500 transition-all disabled:opacity-70 shadow-lg shadow-teal-500/25"
+                                onClick={() => setViewListing(item)}
+                                className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-blue-500 to-teal-500 text-white text-[9px] sm:text-[10px] font-semibold uppercase rounded-lg hover:from-blue-400 hover:to-teal-400 transition-all shadow-lg shadow-blue-500/10"
                               >
-                                {recyclingId === item.id ? '...' : 'Recycle'}
+                                View
                               </button>
-                            )}
-                            {status === 'RECYCLED' && (
-                              <span className="text-[10px] text-teal-400 font-semibold">✓ Complete</span>
-                            )}
-                          </td>
-                              {/* Listing View Modal */}
-                              {viewListing && (
-                                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                                  <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
-                                    <button
-                                      onClick={() => setViewListing(null)}
-                                      className="absolute top-4 right-4 h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-                                    >
-                                      <X size={18} />
-                                    </button>
-                                    <div className="flex items-start gap-4 mb-6">
-                                      <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
-                                        {viewListing.photos && viewListing.photos.length > 0 ? (
-                                          <img src={viewListing.photos[0]} alt="Waste" className="h-16 w-16 rounded-xl object-cover" />
-                                        ) : (
-                                          <Package size={24} className="text-white" />
-                                        )}
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <h3 className="text-xl font-bold text-white mb-1">{viewListing.title}</h3>
-                                        <div className="flex items-center gap-2 text-sm text-slate-400 mb-2">
-                                          <User size={14} />
-                                          <span>{viewListing.sellerEmail}</span>
-                                          {viewListing.location?.address && (
-                                            <>
-                                              <span>•</span>
-                                              <MapPin size={14} />
-                                              <span className="truncate">{viewListing.location.address}</span>
-                                            </>
-                                          )}
-                                        </div>
-                                        <div className="flex items-center gap-4 text-sm">
-                                          <span className="text-slate-300">{viewListing.quantity} MT</span>
-                                          <span className="text-emerald-400 font-semibold"><span style={{fontFamily: 'Arial'}}>₹</span>{viewListing.price}/MT</span>
-                                          <span className={`text-xs font-bold uppercase px-2 py-1 rounded-full border ${statusColors[viewListing.status || 'OPEN']}`}>
-                                            {viewListing.status || 'OPEN'}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    {/* Photos Section - Prominent */}
-                                    {viewListing.photos && viewListing.photos.length > 0 && (
-                                      <div className="mb-6">
-                                        <div className="flex items-center gap-2 mb-3">
-                                          <ImageIcon size={16} className="text-emerald-400" />
-                                          <span className="text-sm font-semibold text-slate-300 uppercase">Photos ({viewListing.photos.length})</span>
-                                        </div>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                          {viewListing.photos.map((url: string, idx: number) => (
-                                            <div key={idx} className="relative group">
-                                              <img
-                                                src={url}
-                                                alt={`Waste photo ${idx + 1}`}
-                                                className="w-full h-24 object-cover rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors"
-                                              />
-                                              <a
-                                                href={url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center"
-                                              >
-                                                <span className="text-white text-xs font-semibold">View Full</span>
-                                              </a>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    {/* Location Section - Prominent */}
-                                    {viewListing.location && (
-                                      <div className="mb-6">
-                                        <div className="flex items-center gap-2 mb-3">
-                                          <MapPin size={16} className="text-blue-400" />
-                                          <span className="text-sm font-semibold text-slate-300 uppercase">Pickup Location</span>
-                                        </div>
-                                        <div className="bg-white/[0.02] border border-white/10 rounded-lg p-4">
-                                          {viewListing.location.address && (
-                                            <p className="text-slate-300 mb-2">{viewListing.location.address}</p>
-                                          )}
-                                          {viewListing.location.latitude && viewListing.location.longitude && (
-                                            <div className="flex items-center gap-2">
-                                              <span className="text-xs text-slate-400">
-                                                Lat: {viewListing.location.latitude.toFixed(6)}, Lng: {viewListing.location.longitude.toFixed(6)}
-                                              </span>
-                                              <a
-                                                href={`https://maps.google.com/?q=${viewListing.location.latitude},${viewListing.location.longitude}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-400 hover:text-blue-300 underline text-sm font-semibold"
-                                              >
-                                                View on Map →
-                                              </a>
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    {(viewListing.status === 'DELIVERED' || viewListing.status === 'RECYCLED') && viewListing.sellerId && user?.uid && (
-                                      <div className="mb-6">
-                                        <div className="flex items-center gap-2 mb-3">
-                                          <DollarSign size={16} className="text-emerald-400" />
-                                          <span className="text-sm font-semibold text-slate-300 uppercase">Payment</span>
-                                        </div>
-                                        <div className="bg-white/[0.02] border border-white/10 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                          <div>
-                                            <p className="text-sm text-slate-300">Settlement amount</p>
-                                            <p className="text-lg font-bold text-emerald-400">
-                                              <span style={{fontFamily: 'Arial'}}>₹</span>
-                                              {(Number(viewListing.price || 0) * Number(viewListing.quantity || 0)).toLocaleString()}
-                                            </p>
-                                          </div>
-                                          <PaymentButton
-                                            amount={Number(viewListing.price || 0) * Number(viewListing.quantity || 0)}
-                                            listingId={viewListing.id}
-                                            buyerId={user.uid}
-                                            sellerId={viewListing.sellerId}
-                                          >
-                                            Pay Farmer
-                                          </PaymentButton>
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    {/* Other Details */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                      <div>
-                                        <span className="text-xs font-semibold text-slate-400 uppercase">Category</span>
-                                        <div className="text-slate-300 mt-1">{viewListing.category || 'Not specified'}</div>
-                                      </div>
-                                      <div>
-                                        <span className="text-xs font-semibold text-slate-400 uppercase">Agent</span>
-                                        <div className="text-slate-300 mt-1">{viewListing.assignedAgentEmail || 'Not assigned'}</div>
-                                      </div>
-                                      {viewListing.description && (
-                                        <div className="sm:col-span-2">
-                                          <span className="text-xs font-semibold text-slate-400 uppercase">Description</span>
-                                          <div className="text-slate-300 mt-1">{viewListing.description}</div>
-                                        </div>
+                              {status === 'DELIVERED' && (
+                                <button
+                                  onClick={() => handleRecycle(item.id)}
+                                  disabled={recyclingId === item.id}
+                                  className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-teal-500 to-teal-600 text-white text-[9px] sm:text-[10px] font-semibold uppercase rounded-lg hover:from-teal-400 hover:to-teal-500 transition-all disabled:opacity-70 shadow-lg shadow-teal-500/25"
+                                >
+                                  {recyclingId === item.id ? '...' : 'Recycle'}
+                                </button>
+                              )}
+                              {status === 'RECYCLED' && (
+                                <span className="text-[10px] text-teal-400 font-semibold">✓ Complete</span>
+                              )}
+                            </td>
+                            {/* Listing View Modal */}
+                            {viewListing && (
+                              <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                                <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
+                                  <button
+                                    onClick={() => setViewListing(null)}
+                                    className="absolute top-4 right-4 h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                                  >
+                                    <X size={18} />
+                                  </button>
+                                  <div className="flex items-start gap-4 mb-6">
+                                    <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
+                                      {viewListing.photos && viewListing.photos.length > 0 ? (
+                                        <img src={viewListing.photos[0]} alt="Waste" className="h-16 w-16 rounded-xl object-cover" />
+                                      ) : (
+                                        <Package size={24} className="text-white" />
                                       )}
                                     </div>
+                                    <div className="flex-1 min-w-0">
+                                      <h3 className="text-xl font-bold text-white mb-1">{viewListing.title}</h3>
+                                      <div className="flex items-center gap-2 text-sm text-slate-400 mb-2">
+                                        <User size={14} />
+                                        <span>{viewListing.sellerEmail}</span>
+                                        {viewListing.location?.address && (
+                                          <>
+                                            <span>•</span>
+                                            <MapPin size={14} />
+                                            <span className="truncate">{viewListing.location.address}</span>
+                                          </>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-4 text-sm">
+                                        <span className="text-slate-300">{viewListing.quantity} MT</span>
+                                        <span className="text-emerald-400 font-semibold"><span style={{ fontFamily: 'Arial' }}>₹</span>{viewListing.price}/MT</span>
+                                        <span className={`text-xs font-bold uppercase px-2 py-1 rounded-full border ${statusColors[viewListing.status || 'OPEN']}`}>
+                                          {viewListing.status || 'OPEN'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Photos Section - Prominent */}
+                                  {viewListing.photos && viewListing.photos.length > 0 && (
+                                    <div className="mb-6">
+                                      <div className="flex items-center gap-2 mb-3">
+                                        <ImageIcon size={16} className="text-emerald-400" />
+                                        <span className="text-sm font-semibold text-slate-300 uppercase">Photos ({viewListing.photos.length})</span>
+                                      </div>
+                                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        {viewListing.photos.map((url: string, idx: number) => (
+                                          <div key={idx} className="relative group">
+                                            <img
+                                              src={url}
+                                              alt={`Waste photo ${idx + 1}`}
+                                              className="w-full h-24 object-cover rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors"
+                                            />
+                                            <a
+                                              href={url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center"
+                                            >
+                                              <span className="text-white text-xs font-semibold">View Full</span>
+                                            </a>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Location Section - Prominent */}
+                                  {viewListing.location && (
+                                    <div className="mb-6">
+                                      <div className="flex items-center gap-2 mb-3">
+                                        <MapPin size={16} className="text-blue-400" />
+                                        <span className="text-sm font-semibold text-slate-300 uppercase">Pickup Location</span>
+                                      </div>
+                                      <div className="bg-white/[0.02] border border-white/10 rounded-lg p-4">
+                                        {viewListing.location.address && (
+                                          <p className="text-slate-300 mb-2">{viewListing.location.address}</p>
+                                        )}
+                                        {viewListing.location.latitude && viewListing.location.longitude && (
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-xs text-slate-400">
+                                              Lat: {viewListing.location.latitude.toFixed(6)}, Lng: {viewListing.location.longitude.toFixed(6)}
+                                            </span>
+                                            <a
+                                              href={`https://maps.google.com/?q=${viewListing.location.latitude},${viewListing.location.longitude}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-400 hover:text-blue-300 underline text-sm font-semibold"
+                                            >
+                                              View on Map →
+                                            </a>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {(viewListing.status === 'DELIVERED' || viewListing.status === 'RECYCLED') && viewListing.sellerId && user?.uid && (
+                                    <div className="mb-6">
+                                      <div className="flex items-center gap-2 mb-3">
+                                        <DollarSign size={16} className="text-emerald-400" />
+                                        <span className="text-sm font-semibold text-slate-300 uppercase">Payment</span>
+                                      </div>
+                                      <div className="bg-white/[0.02] border border-white/10 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                        <div>
+                                          <p className="text-sm text-slate-300">Settlement amount</p>
+                                          <p className="text-lg font-bold text-emerald-400">
+                                            <span style={{ fontFamily: 'Arial' }}>₹</span>
+                                            {(Number(viewListing.price || 0) * Number(viewListing.quantity || 0)).toLocaleString()}
+                                          </p>
+                                        </div>
+                                        <PaymentButton
+                                          amount={Number(viewListing.price || 0) * Number(viewListing.quantity || 0)}
+                                          listingId={viewListing.id}
+                                          buyerId={user.uid}
+                                          sellerId={viewListing.sellerId}
+                                        >
+                                          Pay Farmer
+                                        </PaymentButton>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Other Details */}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                      <span className="text-xs font-semibold text-slate-400 uppercase">Category</span>
+                                      <div className="text-slate-300 mt-1">{viewListing.category || 'Not specified'}</div>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs font-semibold text-slate-400 uppercase">Agent</span>
+                                      <div className="text-slate-300 mt-1">{viewListing.assignedAgentEmail || 'Not assigned'}</div>
+                                    </div>
+                                    {viewListing.description && (
+                                      <div className="sm:col-span-2">
+                                        <span className="text-xs font-semibold text-slate-400 uppercase">Description</span>
+                                        <div className="text-slate-300 mt-1">{viewListing.description}</div>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
-                              )}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="h-16 w-16 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mx-auto mb-4">
-                  <Package size={32} className="text-slate-500" />
+                              </div>
+                            )}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-                <p className="text-slate-400 font-medium">{searchQuery || statusFilter !== 'ALL' ? 'No matching listings' : 'No listings yet'}</p>
-              </div>
-            );
+              ) : (
+                <div className="text-center py-12">
+                  <div className="h-16 w-16 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mx-auto mb-4">
+                    <Package size={32} className="text-slate-500" />
+                  </div>
+                  <p className="text-slate-400 font-medium">{searchQuery || statusFilter !== 'ALL' ? 'No matching listings' : 'No listings yet'}</p>
+                </div>
+              );
             })()}
           </div>
         )}
@@ -1665,13 +1698,13 @@ function AdminDashboard({ user, listings }: any) {
                 <X size={18} />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-400 mb-2 block">Email</label>
                 <p className="text-white bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm">{editingUser.email}</p>
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium text-slate-400 mb-2 block">Name</label>
                 <div className="relative">
@@ -1685,7 +1718,7 @@ function AdminDashboard({ user, listings }: any) {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium text-slate-400 mb-2 block">Phone</label>
                 <div className="relative">
@@ -1699,7 +1732,7 @@ function AdminDashboard({ user, listings }: any) {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium text-slate-400 mb-2 block">Role</label>
                 <select
@@ -1714,7 +1747,7 @@ function AdminDashboard({ user, listings }: any) {
                 </select>
               </div>
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <Button
                 variant="outline"

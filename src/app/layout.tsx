@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import Script from 'next/script';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '../context/auth-context';
 import { RouteProtector } from '@/components/route-protector';
@@ -30,6 +31,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <NextTopLoader color="hsl(var(--primary))" />
         <AuthProvider>
           <RouteProtector>
