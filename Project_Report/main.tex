@@ -16,8 +16,9 @@
 \usepackage{pgfgantt}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
-\usepackage{indentfirst}
 \usepackage{caption}
+% \usepackage{indentfirst} % Removed to avoid indenting first paragraph of sections
+
 
 % ============ FORMATTING ============
 \onehalfspacing
@@ -30,9 +31,9 @@
 % Chapter title formatting
 \titleformat{\chapter}[display]
   {\normalfont\bfseries\fontsize{16}{19}\selectfont\centering}
-  {CHAPTER \thechapter}{0pt}
+  {Chapter No:-\thechapter}{12pt}
   {\fontsize{16}{19}\selectfont\centering}
-  [\vspace{-0.5em}\chapterrule]
+  [\vspace{0.5em}\chapterrule]
 
 % Section (First Order Heading) - 16pt Bold
 \titleformat{\section}
@@ -167,14 +168,24 @@ We extend our heartfelt thanks to \textbf{Dr. Principal Name}, Principal of \tex
 We also wish to acknowledge the support of our families and friends who have been a constant source of motivation.
 
 Finally, we thank all the faculty members and staff of the Department of Computer Engineering for their cooperation and assistance.
+\clearpage
+
+% ---------- SPONSORSHIP ----------
+\chapter*{Sponsorship}
+\addcontentsline{toc}{chapter}{Sponsorship}
+
+\vspace{1cm}
+\noindent Not Applicable / Self-Sponsored.
+\clearpage
 
 % ---------- ABSTRACT ----------
+\newpage
+\pagenumbering{arabic}
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 
-\vspace{24pt}
-
-AgriTrace is a comprehensive, full-stack web application designed to address the pressing issue of agricultural waste management in India. The platform provides a digital ecosystem connecting farmers, collection agents, and recycling administrators through a role-based system built on modern web technologies.
+\vspace{12pt} % Spacing before abstract content
+\noindent AgriTrace is a comprehensive, full-stack web application designed to address the pressing issue of agricultural waste management in India. The platform provides a digital ecosystem connecting farmers, collection agents, and recycling administrators through a role-based system built on modern web technologies.
 
 The system enables farmers to report and list agricultural waste such as wheat stubble, rice residue, corn stover, and other crop residues. Collection agents can browse available waste listings, claim collection tasks, and manage the pickup-to-delivery workflow. Administrators oversee the entire platform, managing users, monitoring analytics, and tracking the recycling pipeline.
 
@@ -182,25 +193,27 @@ Key features include real-time waste tracking with GPS-based location services, 
 
 Built with Next.js 15.5, TypeScript, Firebase (Firestore, Authentication, Storage), Tailwind CSS, and Radix UI components, AgriTrace delivers a responsive, modern user experience. The application employs Firestore security rules for data protection and supports real-time data synchronization across all user roles.
 
-AgriTrace contributes to environmental sustainability by diverting agricultural waste from open burning---a major cause of air pollution---toward productive recycling channels, while providing economic incentives to all stakeholders in the waste management chain.
+\noindent AgriTrace contributes to environmental sustainability by diverting agricultural waste from open burning---a major cause of air pollution---toward productive recycling channels, while providing economic incentives to all stakeholders in the waste management chain.
+\clearpage
 
 % ---------- TABLE OF CONTENTS ----------
 \tableofcontents
 \addcontentsline{toc}{chapter}{Table of Contents}
 
 % ---------- LIST OF FIGURES ----------
+\renewcommand{\listfigurename}{Figure Index}
 \listoffigures
 \addcontentsline{toc}{chapter}{Figure Index}
 
 % ---------- LIST OF TABLES ----------
+\renewcommand{\listtablename}{Table Index}
 \listoftables
 \addcontentsline{toc}{chapter}{Table Index}
 
 % ============================================================
-%                    MAIN REPORT (Arabic)
+%                    MAIN REPORT
 % ============================================================
 \newpage
-\pagenumbering{arabic}
 
 % ============================================================
 %                    CHAPTER 1: INTRODUCTION
@@ -654,7 +667,7 @@ NF-10 & Accessibility & All interactive elements shall have proper ARIA labels a
 
 
 % ============================================================
-%              CHAPTER 6: METHODOLOGY
+%       CHAPTER 6: METHODOLOGY
 % ============================================================
 \chapter{Methodology}
 
@@ -2540,7 +2553,7 @@ Member 4 & Testing \& Documentation & Test cases, security rules, project report
 
     \item[{[2]}] S. Pandey and V. K. Agrawal, ``\textit{Carbon Footprint Assessment of Agricultural Waste Burning in India},'' \textit{Environmental Science and Pollution Research}, Vol. 21, 2014, PP 8820--8830.
 
-    \item[{[3]}] L. Moroney, ``\textit{The Definitive Guide to Firebase},'' Apress, 1st Edition, 2017.
+    \item[{[3]}] L. Moroney, ``\textit{The Definitive Guide to Firebase},'' \textit{Apress, 1st Edition, 2017}.
 
     \item[{[4]}] ``Next.js Documentation,'' \textit{https://nextjs.org/docs}
 
@@ -2556,9 +2569,9 @@ Member 4 & Testing \& Documentation & Test cases, security rules, project report
 
     \item[{[10]}] ``Google Genkit AI Framework,'' \textit{https://firebase.google.com/docs/genkit}
 
-    \item[{[11]}] Ministry of Agriculture and Farmers Welfare, ``\textit{National Policy for Management of Crop Residues},'' Government of India, 2014.
+    \item[{[11]}] Ministry of Agriculture and Farmers Welfare, ``\textit{National Policy for Management of Crop Residues},'' \textit{Government of India, 2014}.
 
-    \item[{[12]}] Indian Agricultural Research Institute (IARI), ``\textit{Crop Residue Management: Challenges and Solutions},'' IARI Publication, New Delhi, 2019.
+    \item[{[12]}] Indian Agricultural Research Institute (IARI), ``\textit{Crop Residue Management: Challenges and Solutions},'' \textit{IARI Publication, New Delhi, 2019}.
 
     \item[{[13]}] ``Recharts -- A Composable Charting Library for React,'' \textit{https://recharts.org/}
 
@@ -2572,11 +2585,11 @@ Member 4 & Testing \& Documentation & Test cases, security rules, project report
 
     \item[{[18]}] ``OpenStreetMap Nominatim -- Geocoding Service,'' \textit{https://nominatim.org/release-docs/latest/api/Reverse/}
 
-    \item[{[19]}] R. Kumar, S. Sharma, and A. Singh, ``\textit{IoT-Based Monitoring of Agricultural Residue Burning},'' \textit{IEEE Sensors Journal}, Vol. 20, No. 8, 2020, PP 4523--4531.
+    \item[{[19]}] R. Kumar, S. Sharma, and A. Singh, ``\textit{IoT-Based Monitoring of Agricultural Residue Burning},'' \textit{IEEE Sensors Journal, Vol. 20, No. 8, 2020, PP 4523--4531}.
 
-    \item[{[20]}] A. Patel, M. Desai, and R. Verma, ``\textit{Mobile-First Design for Rural Indian Applications},'' \textit{International Journal of Human-Computer Studies}, Vol. 131, 2019, PP 45--58.
+    \item[{[20]}] A. Patel, M. Desai, and R. Verma, ``\textit{Mobile-First Design for Rural Indian Applications},'' \textit{International Journal of Human-Computer Studies, Vol. 131, 2019, PP 45--58}.
 
-    \item[{[21]}] B. W. Barry, ``\textit{Constructive Cost Model -- COCOMO},'' \textit{Software Engineering Economics}, Prentice Hall, 1981.
+    \item[{[21]}] B. W. Barry, ``\textit{Software Engineering Economics},'' \textit{Prentice Hall, 1981}.
 
     \item[{[22]}] ``Vercel Platform Documentation,'' \textit{https://vercel.com/docs}
 
@@ -2584,7 +2597,7 @@ Member 4 & Testing \& Documentation & Test cases, security rules, project report
 
     \item[{[24]}] ``Node.js Best Practices,'' \textit{https://nodejs.org/en/docs/guides}
 
-    \item[{[25]}] Central Pollution Control Board (CPCB), ``\textit{Air Quality Monitoring Data -- National Air Quality Index},'' Government of India, 2023.
+    \item[{[25]}] Central Pollution Control Board (CPCB), ``\textit{Air Quality Monitoring Data -- National Air Quality Index},'' \textit{Government of India, 2023}.
 \end{enumerate}
 
 \end{document}
