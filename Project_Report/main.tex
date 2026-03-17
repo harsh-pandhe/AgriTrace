@@ -141,19 +141,17 @@ This is to certify that the project entitled \textbf{``AgriTrace -- Agricultural
 
 \noindent in partial fulfillment of the requirements for the award of the degree of \textbf{Bachelor of Engineering} in \textbf{Computer Engineering} from \textbf{University Name} during the academic year \textbf{2025--2026}.
 
-\vspace{2cm}
+\vspace{2.5cm}
 \noindent
 \begin{center}
-\begin{tabular}{p{7cm}p{7cm}}
-\textbf{Guide} & \textbf{Head of Department} \\[1.5cm]
-Prof. Guide Name & Prof. HOD Name \\
+\begin{tabular}{p{5cm}cp{5cm}}
+\centering \textbf{Prof. Guide Name} & & \centering \textbf{Prof. HOD Name} \\
+\centering Project Guide & & \centering Head of Department
 \end{tabular}
-\end{center}
 
-\vspace{2cm}
-\begin{center}
-\textbf{Principal}\\[1.5cm]
-Dr. Principal Name
+\vspace{2.5cm}
+\textbf{Dr. Principal Name} \\
+Principal, College Name
 \end{center}
 
 \noindent Date: \hspace{2cm} Place:
@@ -828,14 +826,14 @@ Postman & 10.x & API testing and documentation \\
     store/.style={rectangle, draw, fill=orange!20, minimum width=2.5cm, minimum height=0.8cm, align=center, font=\small},
     arrow/.style={-{Stealth[length=2mm]}, thick}
 ]
-\node[entity] (farmer) at (0,4) {Farmer};
+\node[entity] (farmer) at (0,3.5) {Farmer};
 \node[entity] (agent) at (0,0) {Agent};
-\node[entity] (admin) at (0,-4) {Admin};
+\node[entity] (admin) at (0,-3.5) {Admin};
 
-\node[process] (system) at (6,0) {AgriTrace\\System};
+\node[process] (system) at (6.5,0) {AgriTrace\\System};
 
-\node[store] (firestore) at (12,2) {Firestore\\Database};
-\node[store] (razorpay) at (12,-2) {Razorpay\\Gateway};
+\node[store] (firestore) at (13,1.5) {Firestore\\Database};
+\node[store] (razorpay) at (13,-1.5) {Razorpay\\Gateway};
 
 \draw[arrow] (farmer) -- node[above, font=\footnotesize, sloped] {Waste Reports, Listings} (system);
 \draw[arrow] (agent) -- node[above, font=\footnotesize] {Claims, Status Updates} (system);
@@ -844,9 +842,9 @@ Postman & 10.x & API testing and documentation \\
 \draw[arrow] (system) -- node[above, font=\footnotesize, sloped] {Read/Write Data} (firestore);
 \draw[arrow] (system) -- node[above, font=\footnotesize, sloped] {Payment Requests} (razorpay);
 
-\draw[arrow] (system) -- ++(0,3) -| node[near start, above, font=\footnotesize] {Notifications, Status} (farmer);
-\draw[arrow] (system) -- ++(-2,0) |- node[near end, above, font=\footnotesize] {Tasks, Payments} (agent);
-\draw[arrow] (system) -- ++(0,-3) -| node[near start, below, font=\footnotesize] {Analytics, Reports} (admin);
+\draw[arrow] (system) -- ++(0,2.5) -| node[near start, above, font=\footnotesize] {Notifications, Status} (farmer);
+\draw[arrow] (system) -- ++(-1.5,0) |- node[near end, left, font=\footnotesize] {Tasks, Payments} (agent);
+\draw[arrow] (system) -- ++(0,-2.5) -| node[near start, below, font=\footnotesize] {Analytics, Reports} (admin);
 \end{tikzpicture}
 \caption{Level 0 Data Flow Diagram}
 \label{fig:dfd}
@@ -874,12 +872,12 @@ Postman & 10.x & API testing and documentation \\
 
 \draw[arrow] (start) -- (login);
 \draw[arrow] (login) -- (role);
-\draw[arrow] (role) -| node[above, font=\footnotesize] {Farmer} (farmer);
+\draw[arrow] (role) -| node[above left, font=\footnotesize] {Farmer} (farmer);
 \draw[arrow] (role) -- node[right, font=\footnotesize] {Agent} (agent);
-\draw[arrow] (role) -| node[above, font=\footnotesize] {Admin} (admin);
-\draw[arrow] (farmer) |- (action);
+\draw[arrow] (role) -| node[above right, font=\footnotesize] {Admin} (admin);
+\draw[arrow] (farmer) |- ([yshift=0.2cm]action.west);
 \draw[arrow] (agent) -- (action);
-\draw[arrow] (admin) |- (action);
+\draw[arrow] (admin) |- ([yshift=0.2cm]action.east);
 \draw[arrow] (action) -- (update);
 \draw[arrow] (update) -- (end);
 \end{tikzpicture}
@@ -2174,7 +2172,7 @@ Each card features a colored icon, metric value (with animated counter), and a b
 
 \noindent Comprehensive testing was performed across all modules of the AgriTrace platform. The following table presents key test cases:
 
-\begin{longtable}{|p{0.5cm}|p{2.5cm}|p{3.5cm}|p{2.5cm}|p{2cm}|p{1.5cm}|}
+\begin{longtable}{|p{0.8cm}|p{2.5cm}|p{3cm}|p{3.5cm}|p{3.5cm}|p{1.2cm}|}
 \hline
 \textbf{ID} & \textbf{Module} & \textbf{Test Case} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
 \hline
