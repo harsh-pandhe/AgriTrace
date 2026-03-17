@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { createOrder } from '@/lib/firebase-service';
 
 export async function POST(req: Request) {
   try {
@@ -18,24 +17,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // Signature valid — create our order record in Firestore
-    const orderId = await createOrder({ listingId, buyerId, sellerId, price });
-
-    // Also update the listing document
+    // Signature valid — create our order record in Firestore using Admin SDK
     try {
       const { db } = await import('@/lib/firebase-server');
       const { FieldValue } = await import('firebase-admin/firestore');
+
+      // 1. Create the order
+      const orderPayload = {
+        listingId,
+        buyerId,
+        sellerId,
+        price,
+        status: 'Pending',
+        createdAt: FieldValue.serverTimestamp(),
+      };
+
+      const orderRef = await db.collection('orders').add(orderPayload);
+      const orderId = orderRef.id;
+
+      // 2. Update the listing document
       await db.collection('listings').doc(listingId).update({
         paymentStatus: 'PAID',
         orderId: orderId,
         updatedAt: FieldValue.serverTimestamp(),
       });
-    } catch (e) {
-      console.error('Failed to update listing with payment info:', e);
-      // We don't fail the whole request since the order was already created
-    }
 
-    return NextResponse.json({ ok: true, orderId });
+      return NextResponse.json({ ok: true, orderId });
+    } catch (dbErr: any) {
+      console.error('Firestore operation failed in verify route:', dbErr);
+      return NextResponse.json({ error: 'Failed to record transaction' }, { status: 500 });
+    }
   } catch (err: any) {
     console.error('Razorpay verify error:', err);
     return NextResponse.json({ error: err?.message || 'Unknown' }, { status: 500 });
