@@ -805,7 +805,7 @@ function AgentDashboard({ user, listings }: any) {
                   <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-white/[0.02] rounded-xl border border-blue-500/10 hover:bg-blue-500/5 hover:border-blue-500/20 transition-all duration-300 gap-4">
                     <div className="flex items-center gap-4 flex-1">
                       <div className="h-12 w-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl flex-shrink-0 overflow-hidden">
-                        {item.photos && item.photos.length > 0 ? (
+                        {item.photos && item.photos.length > 0 && !item.photos[0].includes('localhost') ? (
                           <img src={item.photos[0]} alt="Waste" className="h-full w-full object-cover" />
                         ) : (
                           <span>🌾</span>
@@ -857,7 +857,7 @@ function AgentDashboard({ user, listings }: any) {
                     <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-white/[0.02] rounded-xl border border-amber-500/10 hover:bg-amber-500/5 hover:border-amber-500/20 transition-all duration-300 gap-4">
                       <div className="flex items-center gap-4 flex-1">
                         <div className="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl flex-shrink-0 overflow-hidden">
-                          {item.photos && item.photos.length > 0 ? (
+                          {item.photos && item.photos.length > 0 && !item.photos[0].includes('localhost') ? (
                             <img src={item.photos[0]} alt="Waste" className="h-full w-full object-cover" />
                           ) : (
                             <span>📦</span>
