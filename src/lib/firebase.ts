@@ -18,9 +18,9 @@ const missingEnvKeys = Object.entries(firebaseEnv)
   .map(([key]) => key);
 
 if (missingEnvKeys.length > 0) {
-  throw new Error(
+  console.warn(
     `Firebase environment variables are missing: ${missingEnvKeys.join(', ')}. ` +
-    'Add them to .env.local (see .env.local.example).'
+    'Add them to .env.local (see .env.local.example). Firebase features will not work correctly.'
   );
 }
 
