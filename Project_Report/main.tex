@@ -178,7 +178,7 @@ AgriTrace is a comprehensive, full-stack web application designed to address the
 
 The system enables farmers to report and list agricultural waste such as wheat stubble, rice residue, corn stover, and other crop residues. Collection agents can browse available waste listings, claim collection tasks, and manage the pickup-to-delivery workflow. Administrators oversee the entire platform, managing users, monitoring analytics, and tracking the recycling pipeline.
 
-Key features include real-time waste tracking with GPS-based location services, photo documentation for waste verification, integrated payment processing via Razorpay, a carbon credit tracking system that quantifies environmental impact, and a gamification-based rewards system to incentivize participation. The platform also integrates AI capabilities through Google Genkit for intelligent waste classification.
+Key features include real-time waste tracking with GPS-based location services, photo documentation for waste verification, an integrated payment workflow for agent-to-farmer transactions via Razorpay, a carbon credit tracking system that quantifies environmental impact, and a gamification-based rewards system to incentivize participation. The platform also integrates AI capabilities through Google Genkit for intelligent waste classification.
 
 Built with Next.js 15.5, TypeScript, Firebase (Firestore, Authentication, Storage), Tailwind CSS, and Radix UI components, AgriTrace delivers a responsive, modern user experience. The application employs Firestore security rules for data protection and supports real-time data synchronization across all user roles.
 
@@ -1077,6 +1077,12 @@ listings & assignedAgentEmail & string & Agent's email for display \\
 \hline
 listings & location & map & GPS coordinates and address \\
 \hline
+listings & assignedAgentEmail & string & Email of the assigned collection agent \\
+\hline
+listings & paymentStatus & string & Status of payment to farmer (PENDING, PAID) \\
+\hline
+listings & orderId & string & Reference to the recorded order document \\
+\hline
 listings & createdAt & timestamp & Listing creation time \\
 \hline
 listings & updatedAt & timestamp & Last status update time \\
@@ -1617,74 +1623,82 @@ export async function uploadMultipleImages(
 \begin{lstlisting}[caption={Payment Button Component (payment-button.tsx)}, label={lst:payment}]
 'use client';
 import { useState } from 'react';
+import { Button } from './ui/button';
 
 interface PaymentButtonProps {
-  amount: number;
-  listingId: string;
-  buyerId: string;
-  sellerId: string;
-  onSuccess?: (orderId: string) => void;
-  children?: React.ReactNode;
+    amount: number;
+    listingId: string;
+    buyerId: string;
+    sellerId: string;
+    onSuccess?: (orderId: string) => void;
+    children?: React.ReactNode;
+    className?: string;
+    variant?: 'default' | 'outline' | 'ghost';
 }
 
 export default function PaymentButton({
-  amount, listingId, buyerId, sellerId,
-  onSuccess, children,
+    amount, listingId, buyerId, sellerId,
+    onSuccess, children, className, variant = 'default'
 }: PaymentButtonProps) {
-  const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-  const handlePayment = async () => {
-    setLoading(true);
-    try {
-      // Step 1: Create order on server
-      const res = await fetch('/api/payment/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount, listingId, buyerId, sellerId,
-        }),
-      });
-      const { orderId, razorpayOrderId } = await res.json();
+    const handlePayment = async () => {
+        setLoading(true);
+        try {
+            // Step 1: Create Razorpay order
+            const res = await fetch('/api/razorpay/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount, listingId, buyerId, sellerId }),
+            });
+            const { razorpayOrderId } = await res.json();
 
-      // Step 2: Open Razorpay checkout
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: amount * 100,
-        currency: 'INR',
-        order_id: razorpayOrderId,
-        name: 'AgriTrace',
-        description: 'Waste Purchase Payment',
-        handler: function (response: any) {
-          onSuccess?.(orderId);
-        },
-      };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
-    } catch (error) {
-      console.error('Payment error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+            // Step 2: Initialize Razorpay Checkout
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                amount: amount * 100,
+                currency: 'INR',
+                order_id: razorpayOrderId,
+                handler: async function (response: any) {
+                    // Verify payment on server
+                    const verifyRes = await fetch('/api/razorpay/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            listingId, buyerId, sellerId, price: amount,
+                        }),
+                    });
+                    const verifyData = await verifyRes.json();
+                    if (verifyData.ok) onSuccess?.(verifyData.orderId);
+                }
+            };
+            const rzp = new (window as any).Razorpay(options);
+            rzp.open();
+        } catch (err) { console.error('Payment error:', err); }
+        finally { setLoading(false); }
+    };
 
-  return (
-    <button onClick={handlePayment} disabled={loading}>
-      {loading ? 'Processing...' : children || 'Pay Now'}
-    </button>
-  );
+    return (
+        <Button onClick={handlePayment} disabled={loading} 
+                className={className} variant={variant}>
+            {children}
+        </Button>
+    );
 }
 \end{lstlisting}
 
 \noindent The payment flow follows a two-step process: (1) a server-side API call creates a Razorpay order with the amount and metadata, and (2) the Razorpay checkout modal is launched on the client side. This ensures that payment amounts cannot be tampered with by the client.
 
-\section{Razorpay Payment API Route}
+\section{Razorpay Payment API Routes}
 
-\noindent The Next.js API route handles server-side order creation and verification:
+\noindent The Next.js API handles server-side order creation and cryptographic verification. The order creation route initiates the transaction with Razorpay:
 
-\begin{lstlisting}[caption={Payment Order API (api/payment/create-order/route.ts)}, label={lst:paymentapi}]
+\begin{lstlisting}[caption={Razorpay Order Creation (api/razorpay/create/route.ts)}, label={lst:paymentcreate}]
 import Razorpay from 'razorpay';
 import { NextResponse } from 'next/server';
-import { createOrder } from '@/lib/firebase-service';
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID!,
@@ -1693,38 +1707,63 @@ const razorpay = new Razorpay({
 
 export async function POST(request: Request) {
   try {
-    const { amount, listingId, buyerId, sellerId } =
-      await request.json();
-
-    // Create Razorpay order
+    const { amount } = await request.json();
     const razorpayOrder = await razorpay.orders.create({
-      amount: amount * 100, // Razorpay expects paise
+      amount: amount * 100, // paise 
       currency: 'INR',
       receipt: `receipt_${Date.now()}`,
     });
-
-    // Store order in Firestore
-    const orderId = await createOrder({
-      listingId,
-      buyerId,
-      sellerId,
-      price: amount,
-    });
-
-    return NextResponse.json({
-      orderId,
-      razorpayOrderId: razorpayOrder.id,
-    });
+    return NextResponse.json({ razorpayOrderId: razorpayOrder.id });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to create order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }
 \end{lstlisting}
 
-\noindent The API route uses server-side Razorpay credentials (never exposed to the client). The order amount is converted from rupees to paise (multiply by 100) as required by the Razorpay API. A corresponding Firestore order document is created to maintain an internal record of all transactions.
+\noindent The function returns the Razorpay order ID which is then used by the client-side checkout modal. After the user completes the payment, the following verification route ensures the payment's cryptographic integrity:
+
+\begin{lstlisting}[caption={Razorpay Payment Verification (api/razorpay/verify/route.ts)}, label={lst:paymentverify}]
+import { NextResponse } from 'next/server';
+import crypto from 'crypto';
+
+export async function POST(req: Request) {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, 
+            razorpay_signature, listingId, buyerId, 
+            sellerId, price } = await req.json();
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+      .update(body.toString())
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
+      return NextResponse.json({ error: 'Invalid' }, { status: 400 });
+    }
+
+    // Use Firebase Admin for reliable server-side persistence
+    const { db } = await import('@/lib/firebase-server');
+    const { FieldValue } = await import('firebase-admin/firestore');
+    
+    const orderRef = await db.collection('orders').add({
+      listingId, buyerId, sellerId, price,
+      status: 'Paid', createdAt: FieldValue.serverTimestamp(),
+    });
+
+    await db.collection('listings').doc(listingId).update({
+      paymentStatus: 'PAID', orderId: orderRef.id,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    return NextResponse.json({ ok: true, orderId: orderRef.id });
+  } catch (err) {
+    return NextResponse.json({ error: 'Error' }, { status: 500 });
+  }
+}
+\end{lstlisting}
+
+\noindent This verification step is critical for security as it prevents malicious users from forging payment success responses. By performing this check on the server using the \texttt{RAZORPAY\_KEY\_SECRET} and then updating the database using the Firebase Admin SDK, we ensure that the transaction is legitimate and the listing status is accurately reflected.
 
 \section{Admin Statistics Service}
 
@@ -1999,7 +2038,7 @@ Each card features a colored icon, metric value (with animated counter), and a b
 \noindent Shows all listings assigned to the current agent, organized by status:
 \begin{itemize}
     \item \textbf{ASSIGNED:} ``Start Pickup'' button transitions the listing to IN\_TRANSIT
-    \item \textbf{IN\_TRANSIT:} ``Mark Delivered'' button transitions the listing to DELIVERED, with an optional delivery proof photo upload
+    \item \textbf{IN\_TRANSIT:} ``Pay \& Deliver'' button triggers the integrated Razorpay payment flow. Upon successful verification of the payment signature, the system atomically updates the listing status to DELIVERED, marks the payment as PAID, and links the transaction's unique order ID to the listing document.
     \item Action buttons use confirmation dialogs to prevent accidental status changes
 \end{itemize}
 
