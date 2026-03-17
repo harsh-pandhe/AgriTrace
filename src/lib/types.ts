@@ -162,6 +162,8 @@ export interface Listing {
   status?: ListingStatus;
   assignedAgentId?: string;
   assignedAgentEmail?: string;
+  paymentStatus?: 'PENDING' | 'PAID';
+  orderId?: string;
   createdAt?: Timestamp | Date;
   updatedAt?: Timestamp | Date;
 }

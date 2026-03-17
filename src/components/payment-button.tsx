@@ -19,6 +19,9 @@ interface PaymentButtonProps {
     onSuccess?: (orderId: string) => void;
     onError?: (error: unknown) => void;
     children?: React.ReactNode;
+    className?: string;
+    variant?: 'default' | 'outline' | 'ghost';
+    showReceipt?: boolean;
 }
 
 const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
@@ -31,6 +34,9 @@ export default function PaymentButton({
     onSuccess,
     onError: _onError,
     children,
+    className,
+    variant = 'default',
+    showReceipt = true,
 }: PaymentButtonProps) {
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -168,7 +174,8 @@ export default function PaymentButton({
             <Button
                 onClick={handlePayment}
                 disabled={loading}
-                className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 h-10 sm:h-11 px-4 sm:px-6 text-xs sm:text-sm font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:shadow-emerald-500/30"
+                variant={variant}
+                className={className || "w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 h-10 sm:h-11 px-4 sm:px-6 text-xs sm:text-sm font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:shadow-emerald-500/30"}
             >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {children || `Pay ₹${amount}`}

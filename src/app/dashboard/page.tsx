@@ -884,13 +884,23 @@ function AgentDashboard({ user, listings }: any) {
                           </button>
                         )}
                         {status === 'IN_TRANSIT' && (
-                          <button
-                            onClick={() => handleDeliver(item.id)}
-                            disabled={actionLoading === item.id}
-                            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-semibold uppercase rounded-lg hover:from-emerald-400 hover:to-emerald-500 shadow-lg shadow-emerald-500/25 transition-all disabled:opacity-70"
+                          <PaymentButton
+                            amount={Number(item.price || 0) * Number(item.quantity || 1)}
+                            listingId={item.id}
+                            buyerId={user?.uid}
+                            sellerId={item.sellerId}
+                            onSuccess={() => handleDeliver(item.id)}
+                            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-semibold uppercase rounded-lg hover:from-emerald-400 hover:to-emerald-500 shadow-lg shadow-emerald-500/25 transition-all disabled:opacity-70 flex items-center gap-2"
                           >
-                            {actionLoading === item.id ? 'Delivering...' : 'Mark Delivered'}
-                          </button>
+                            {actionLoading === item.id ? (
+                              <>
+                                <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Processing...</span>
+                              </>
+                            ) : (
+                              "Pay & Deliver"
+                            )}
+                          </PaymentButton>
                         )}
                       </div>
                     </div>

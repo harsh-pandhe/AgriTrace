@@ -21,6 +21,20 @@ export async function POST(req: Request) {
     // Signature valid — create our order record in Firestore
     const orderId = await createOrder({ listingId, buyerId, sellerId, price });
 
+    // Also update the listing document
+    try {
+      const { db } = await import('@/lib/firebase-server');
+      const { FieldValue } = await import('firebase-admin/firestore');
+      await db.collection('listings').doc(listingId).update({
+        paymentStatus: 'PAID',
+        orderId: orderId,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      console.error('Failed to update listing with payment info:', e);
+      // We don't fail the whole request since the order was already created
+    }
+
     return NextResponse.json({ ok: true, orderId });
   } catch (err: any) {
     console.error('Razorpay verify error:', err);
