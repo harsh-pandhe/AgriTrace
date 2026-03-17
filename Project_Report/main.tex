@@ -1,7 +1,7 @@
 \documentclass[a4paper,12pt]{report}
 
 % ============ PACKAGES ============
-\usepackage[top=2.5cm, bottom=1.25cm, left=3.5cm, right=1.25cm]{geometry}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
 \usepackage{mathptmx}
 \usepackage{setspace}
 \usepackage{titlesec}
@@ -24,6 +24,7 @@
 \onehalfspacing
 \setlength{\parindent}{1.5cm}
 \setlength{\parskip}{0pt}
+\renewcommand{\arraystretch}{1.3} % Improve vertical spacing in tables
 
 % Helper command for chapter rule (avoids nested bracket issue in titleformat)
 \newcommand{\chapterrule}{\titlerule[2.25pt]}
@@ -142,10 +143,12 @@ This is to certify that the project entitled \textbf{``AgriTrace -- Agricultural
 
 \vspace{2cm}
 \noindent
+\begin{center}
 \begin{tabular}{p{7cm}p{7cm}}
 \textbf{Guide} & \textbf{Head of Department} \\[1.5cm]
 Prof. Guide Name & Prof. HOD Name \\
 \end{tabular}
+\end{center}
 
 \vspace{2cm}
 \begin{center}
@@ -170,12 +173,6 @@ We also wish to acknowledge the support of our families and friends who have bee
 Finally, we thank all the faculty members and staff of the Department of Computer Engineering for their cooperation and assistance.
 \clearpage
 
-% ---------- SPONSORSHIP ----------
-\chapter*{Sponsorship}
-\addcontentsline{toc}{chapter}{Sponsorship}
-
-\vspace{1cm}
-\noindent Not Applicable / Self-Sponsored.
 \clearpage
 
 % ---------- ABSTRACT ----------
