@@ -1,7 +1,7 @@
 \documentclass[a4paper,12pt,oneside]{report}
 
 % ============ PACKAGES ============
-\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage[top=1in, bottom=0.8in, left=1in, right=1in]{geometry}
 \usepackage{mathptmx}
 \usepackage{setspace}
 \usepackage{titlesec}
@@ -17,6 +17,13 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
 \usepackage{caption}
+\usepackage{float}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\usepackage{needspace}
+\usepackage{etoolbox}
+\usepackage{eso-pic}
+\usepackage{tikzpagenodes}
 % \usepackage{indentfirst} % Removed to avoid indenting first paragraph of sections
 
 
@@ -24,17 +31,64 @@
 \onehalfspacing
 \setlength{\parindent}{1.5cm}
 \setlength{\parskip}{0pt}
+\AtBeginDocument{\justifying}
+\widowpenalty=10000
+\clubpenalty=10000
+\displaywidowpenalty=10000
 \renewcommand{\arraystretch}{1.3} % Improve vertical spacing in tables
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\setlength{\LTleft}{\fill}
+\setlength{\LTright}{\fill}
 
-% Helper command for chapter rule (avoids nested bracket issue in titleformat)
-\newcommand{\chapterrule}{\titlerule[2.25pt]}
+% Keep points/sub-points together to reduce split items across pages.
+\let\originalitem\item
+\renewcommand{\item}{\Needspace{10\baselineskip}\originalitem}
+\setlist[itemize]{topsep=4pt,itemsep=3pt,parsep=0pt,partopsep=0pt,before=\Needspace{10\baselineskip}}
+\setlist[enumerate]{topsep=4pt,itemsep=3pt,parsep=0pt,partopsep=0pt,before=\Needspace{10\baselineskip}}
+\pretocmd{\section}{\Needspace{8\baselineskip}}{}{}
+\pretocmd{\subsection}{\Needspace{6\baselineskip}}{}{}
+\pretocmd{\subsubsection}{\Needspace{5\baselineskip}}{}{}
 
-% Chapter title formatting
+% Suppress default chapter heading text; chapter cover is rendered via \chapterbanner.
 \titleformat{\chapter}[display]
-  {\normalfont\bfseries\fontsize{16}{19}\selectfont\centering}
-  {Chapter No:-\thechapter}{12pt}
-  {\fontsize{16}{19}\selectfont\centering}
-  [\vspace{0.5em}\chapterrule]
+  {\normalfont}
+  {}{0pt}{}
+\titlespacing*{\chapter}{0pt}{0pt}{0pt}
+
+\newcommand{\chapterbanner}[1]{%
+  \clearpage
+  \thispagestyle{empty}
+  \vspace*{\fill}
+  \begin{center}
+    \begin{tikzpicture}
+      \node[inner sep=0] (img) {\includegraphics[width=0.92\textwidth]{../6c901521-fcfe-4700-8635-eb6cf4a7b2f8-removebg-preview.png}};
+      \node[
+        text=white,
+        rounded corners=2pt,
+        inner xsep=10pt,
+        inner ysep=4pt,
+        align=center,
+        font=\bfseries\fontsize{18}{20}\selectfont
+      ] at (img.center) {#1};
+    \end{tikzpicture}
+  \end{center}
+  \vspace*{\fill}
+  \clearpage
+}
+
+\newcommand{\projectscreenshot}[3]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{#1}{%
+      \includegraphics[width=0.92\textwidth]{#1}
+    }{%
+      \fbox{\parbox{0.9\textwidth}{\centering Screenshot file missing: #1}}
+    }
+    \caption{#2}
+    \label{#3}
+  \end{figure}
+}
 
 % Section (First Order Heading) - 16pt Bold
 \titleformat{\section}
@@ -45,20 +99,38 @@
 % Subsection (Second Order Heading) - 14pt Bold
 \titleformat{\subsection}
   {\normalfont\bfseries\fontsize{14}{17}\selectfont}
-  {\thesubsection}{1em}{}
+  {}{0em}{}
 \titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
 
-% Page numbering centered
+% Page numbering right, college logo left
 \pagestyle{fancy}
 \fancyhf{}
-\fancyfoot[C]{\thepage}
-\renewcommand{\headrulewidth}{0pt}
+\fancyhead[L]{\textbf{AgriTrace -- Agricultural Waste Tracking \& Recycling Platform}}
+\fancyfoot[L]{\textbf{S.P.M Polytechnic Kumathe, Solapur}}
+\fancyfoot[R]{\thepage}
+\setlength{\headheight}{15pt}
+\renewcommand{\headrulewidth}{0.4pt}
 
-% Ensure chapter opening pages also have centered page number
+% Ensure chapter opening pages also have right page number
 \fancypagestyle{plain}{%
   \fancyhf{}%
-  \fancyfoot[C]{\thepage}%
-  \renewcommand{\headrulewidth}{0pt}%
+  \fancyhead[L]{\textbf{AgriTrace -- Agricultural Waste Tracking \& Recycling Platform}}%
+  \fancyfoot[L]{\textbf{S.P.M Polytechnic Kumathe, Solapur}}%
+  \fancyfoot[R]{\thepage}%
+  \setlength{\headheight}{15pt}%
+  \renewcommand{\headrulewidth}{0.4pt}%
+}
+
+% Border on every page.
+\AddToShipoutPictureBG{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[line width=0.8pt]
+      ([xshift=0.6cm,yshift=-0.6cm]current page.north west)
+      rectangle
+      ([xshift=-0.6cm,yshift=0.6cm]current page.south east);
+  \end{tikzpicture}%
 }
 
 % Code listing style
@@ -85,110 +157,36 @@
   citecolor=black
 }
 
+\newcommand{\abstractheading}{%
+  \begin{center}
+    {\bfseries\fontsize{18}{22}\selectfont ABSTRACT}
+  \end{center}
+  \vspace{8pt}
+}
+
 \begin{document}
 
-% ============================================================
-%                     COVER PAGE
-% ============================================================
-\begin{titlepage}
-\begin{center}
-\vspace*{1cm}
-{\Large \textbf{A PROJECT REPORT}}\\[0.3cm]
-{\large ON}\\[0.5cm]
-{\LARGE \textbf{AgriTrace -- Agricultural Waste Tracking \& Recycling Platform}}\\[1.5cm]
-
-{\large Submitted in partial fulfillment of the requirements for the degree of}\\[0.3cm]
-{\Large \textbf{Bachelor of Engineering}}\\[0.3cm]
-{\large in}\\[0.3cm]
-{\Large \textbf{Computer Engineering}}\\[1.5cm]
-
-{\large \textbf{Submitted by:}}\\[0.3cm]
-{\large Student Name 1 (Roll No.)}\\
-{\large Student Name 2 (Roll No.)}\\
-{\large Student Name 3 (Roll No.)}\\
-{\large Student Name 4 (Roll No.)}\\[1.5cm]
-
-{\large \textbf{Under the Guidance of}}\\[0.3cm]
-{\large Prof. Guide Name}\\[1.5cm]
-
-{\large \textbf{Department of Computer Engineering}}\\[0.3cm]
-{\large College Name}\\[0.3cm]
-{\large University Name}\\[0.3cm]
-{\large Academic Year 2025--2026}
-\end{center}
-\end{titlepage}
-
-% ============================================================
-%                   PRELIMINARY PAGES (Roman)
-% ============================================================
-\pagenumbering{roman}
-
-% ---------- CERTIFICATE ----------
-\chapter*{Certificate}
-\addcontentsline{toc}{chapter}{Certificate}
-\setcounter{page}{1}
-
-This is to certify that the project entitled \textbf{``AgriTrace -- Agricultural Waste Tracking \& Recycling Platform''} is a bonafide work carried out by:
-
-\begin{center}
-\begin{tabular}{ll}
-1. & Student Name 1 (Roll No.) \\
-2. & Student Name 2 (Roll No.) \\
-3. & Student Name 3 (Roll No.) \\
-4. & Student Name 4 (Roll No.) \\
-\end{tabular}
-\end{center}
-
-\noindent in partial fulfillment of the requirements for the award of the degree of \textbf{Bachelor of Engineering} in \textbf{Computer Engineering} from \textbf{University Name} during the academic year \textbf{2025--2026}.
-
-\vspace{2.5cm}
-
-\noindent
-\begin{minipage}{0.45\textwidth}
-    \centering
-    \textbf{Prof. Guide Name} \\
-    Project Guide
-\end{minipage}
-\hfill
-\begin{minipage}{0.45\textwidth}
-    \centering
-    \textbf{Prof. HOD Name} \\
-    Head of Department
-\end{minipage}
-
-\vspace{3cm}
-
-\begin{center}
-    \textbf{Dr. Principal Name} \\
-    Principal, College Name
-\end{center}
-
-\noindent Date: \hspace{2cm} Place:
-
-% ---------- ACKNOWLEDGEMENT ----------
-\chapter*{Acknowledgement}
-\addcontentsline{toc}{chapter}{Acknowledgement}
-
-We would like to express our sincere gratitude to our project guide \textbf{Prof. Guide Name} for providing invaluable guidance, constant supervision, and encouragement throughout the development of this project.
-
-We are deeply thankful to \textbf{Prof. HOD Name}, Head of the Department of Computer Engineering, for providing us with the necessary facilities and support.
-
-We extend our heartfelt thanks to \textbf{Dr. Principal Name}, Principal of \textbf{College Name}, for providing a conducive environment for research and development.
-
-We also wish to acknowledge the support of our families and friends who have been a constant source of motivation.
-
-Finally, we thank all the faculty members and staff of the Department of Computer Engineering for their cooperation and assistance.
-\clearpage
-
-\clearpage
+% ---------- AUX GENERATORS ----------
+\makeatletter
+\def\GenerateAuxFiles{
+  \setbox0=\vbox{
+    \tableofcontents
+    \listoffigures
+    \listoftables
+  }
+}
+\makeatother
+\GenerateAuxFiles
 
 % ---------- ABSTRACT ----------
-\newpage
-\pagenumbering{arabic}
-\chapter*{Abstract}
+\pagenumbering{roman}
+\setcounter{page}{1}
+\chapter*{}
+\vspace*{-1.0cm}
+\abstractheading
 \addcontentsline{toc}{chapter}{Abstract}
 
-\vspace{12pt} % Spacing before abstract content
+\vspace{12pt}
 \noindent AgriTrace is a comprehensive, full-stack web application designed to address the pressing issue of agricultural waste management in India. The platform provides a digital ecosystem connecting farmers, collection agents, and recycling administrators through a role-based system built on modern web technologies.
 
 The system enables farmers to report and list agricultural waste such as wheat stubble, rice residue, corn stover, and other crop residues. Collection agents can browse available waste listings, claim collection tasks, and manage the pickup-to-delivery workflow. Administrators oversee the entire platform, managing users, monitoring analytics, and tracking the recycling pipeline.
@@ -198,31 +196,136 @@ Key features include real-time waste tracking with GPS-based location services, 
 Built with Next.js 15.5, TypeScript, Firebase (Firestore, Authentication, Storage), Tailwind CSS, and Radix UI components, AgriTrace delivers a responsive, modern user experience. The application employs Firestore security rules for data protection and supports real-time data synchronization across all user roles.
 
 \noindent AgriTrace contributes to environmental sustainability by diverting agricultural waste from open burning---a major cause of air pollution---toward productive recycling channels, while providing economic incentives to all stakeholders in the waste management chain.
+
+% ---------- INDEX PAGES ----------
+\newpage
+\begin{center}
+\textbf{\fontsize{16}{18}\selectfont Table of Contents}
+\end{center}
+\vspace{10pt}
+\begin{center}
+\begin{tabular}{|C{1.5cm}|L{11.5cm}|C{2cm}|}
+\hline
+\textbf{Sr. No.} & \textbf{Topic} & \textbf{Page No.} \\
+\hline
+1 & \textbf{Abstract} & i \\ \hline
+2 & \textbf{Chapter 1: Introduction} & 1 \\ \hline
+3 & \textbf{Chapter 2: Problem Statement} & 4 \\ \hline
+4 & \textbf{Chapter 3: Literature Survey} & 7 \\ \hline
+5 & \textbf{Chapter 4: Objectives and Scope of the Project} & 9 \\ \hline
+6 & \textbf{Chapter 5: Requirement Analysis} & 12 \\ \hline
+7 & \textbf{Chapter 6: Methodology} & 17 \\ \hline
+8 & \textbf{Chapter 7: System Design and Modeling} & 22 \\ \hline
+9 & \textbf{Chapter 8: Coding} & 31 \\ \hline
+10 & \textbf{Chapter 9: Output} & 50 \\ \hline
+11 & \textbf{Chapter 10: Testing} & 78 \\ \hline
+12 & \textbf{Chapter 11: Project Cost Estimation} & 83 \\ \hline
+13 & \textbf{Chapter 12: Applications and Future Enhancements} & 87 \\ \hline
+14 & \textbf{Chapter 13: Conclusion} & 91 \\ \hline
+15 & \textbf{Chapter 14: Bibliography} & 95 \\ \hline
+\end{tabular}
+\end{center}
 \clearpage
 
-% ---------- TABLE OF CONTENTS ----------
-\tableofcontents
-\addcontentsline{toc}{chapter}{Table of Contents}
+\begin{center}
+\textbf{\fontsize{16}{18}\selectfont Figure Index}
+\end{center}
+\vspace{5pt}
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.95}
+\begin{tabular}{|C{1.5cm}|L{11.5cm}|C{2cm}|}
+\hline
+\textbf{Sr. No.} & \textbf{Figure Name} & \textbf{Page No.} \\
+\hline
+1 & 5.1 Project Development Gantt Chart & 24 \\ \hline
+2 & 5.2 Level 0 Data Flow Diagram & 24 \\ \hline
+3 & 5.3 Application Flow Diagram & 25 \\ \hline
+4 & 5.4 Use Case Diagram & 26 \\ \hline
+5 & 5.5 Activity Diagram & 27 \\ \hline
+6 & 5.6 Entity-Relationship Diagram & 27 \\ \hline
+7 & 7.1 Landing Page Hero Section & 52 \\ \hline
+8 & 7.2 Login Page & 53 \\ \hline
+9 & 7.3 Signup Page & 53 \\ \hline
+10 & 7.4 Farmer Dashboard & 54 \\ \hline
+11 & 7.5 Agent Dashboard & 54 \\ \hline
+12 & 7.6 Landing Page Workflow Section & 55 \\ \hline
+13 & 7.7 Razorpay Payment Gateway Page & 55 \\ \hline
+14 & 7.8 Payment Confirmation Page & 56 \\ \hline
+15 & 7.9 Contact Us Section & 56 \\ \hline
+16 & 7.10 Full Landing Page & 57 \\ \hline
+17 & 7.11 Features Section (Full) & 57 \\ \hline
+18 & 7.12 Compliance Section & 58 \\ \hline
+19 & 7.13 Call-to-Action and Footer Section & 58 \\ \hline
+20 & 7.14 Contact Section (Full) & 59 \\ \hline
+21 & 7.15 Login Screen (Full) & 59 \\ \hline
+22 & 7.16 Signup Screen (Full) & 60 \\ \hline
+23 & 7.17 Farmer Dashboard (Full) & 60 \\ \hline
+24 & 7.18 Agent Dashboard (Full) & 61 \\ \hline
+25 & 7.19 Razorpay Checkout (Full) & 61 \\ \hline
+26 & 7.20 Payment Confirmation (Full) & 62 \\ \hline
+27 & 7.21 Landing Page (Additional Capture) & 62 \\ \hline
+28 & 7.22 Features Section (Additional Capture) & 63 \\ \hline
+29 & 7.23 Login Screen (Additional Capture) & 63 \\ \hline
+30 & 7.24 Signup Screen (Additional Capture) & 64 \\ \hline
+31 & 7.25 Farmer Dashboard (Additional Capture) & 64 \\ \hline
+32 & 7.26 Agent Dashboard (Additional Capture) & 65 \\ \hline
+33 & 7.27 Razorpay Checkout (Additional Capture) & 65 \\ \hline
+34 & 7.28 Payment Confirmation (Additional Capture) & 66 \\ \hline
+35 & 7.29 Contact Section (Additional Capture) & 66 \\ \hline
+36 & 7.30 Landing Page (Submitted Output) & 67 \\ \hline
+37 & 7.31 Features Page (Submitted Output) & 67 \\ \hline
+38 & 7.32 Login Page (Submitted Output) & 68 \\ \hline
+39 & 7.33 Sign Up Page (Submitted Output) & 68 \\ \hline
+40 & 7.34 Farmer Page (Submitted Output) & 69 \\ \hline
+41 & 7.35 Agent Page (Submitted Output) & 69 \\ \hline
+42 & 7.36 Razorpay Page (Submitted Output) & 70 \\ \hline
+43 & 7.37 Payment Confirmation (Submitted Output) & 70 \\ \hline
+44 & 7.38 Contact Us Page (Submitted Output) & 71 \\ \hline
+\end{tabular}
+\end{center}
+\clearpage
 
-% ---------- LIST OF FIGURES ----------
-\renewcommand{\listfigurename}{Figure Index}
-\listoffigures
-\addcontentsline{toc}{chapter}{Figure Index}
-
-% ---------- LIST OF TABLES ----------
-\renewcommand{\listtablename}{Table Index}
-\listoftables
-\addcontentsline{toc}{chapter}{Table Index}
-
+\begin{center}
+\textbf{\fontsize{16}{18}\selectfont Table Index}
+\end{center}
+\vspace{10pt}
+\begin{center}
+\begin{tabular}{|C{1.5cm}|L{11.5cm}|C{2cm}|}
+\hline
+\textbf{Sr. No.} & \textbf{Table Name} & \textbf{Page No.} \\
+\hline
+1 & 1.1 State-wise Crop Residue Generation and Burning Estimates & 6 \\ \hline
+2 & 3.1 Hardware Requirements & 14 \\ \hline
+3 & 3.2 Software Requirements & 14 \\ \hline
+4 & 3.3 Functional Requirements & 15 \\ \hline
+5 & 3.4 Non-Functional Requirements & 16 \\ \hline
+6 & 4.1 Development Tools & 21 \\ \hline
+7 & 5.1 Firestore Collection Schema -- Users & 26 \\ \hline
+8 & 5.2 Firestore Collection Schema -- Listings & 27 \\ \hline
+9 & 5.3 Firestore Collection Schema -- Orders and Notifications & 28 \\ \hline
+10 & 8.1 Test Cases and Results & 82 \\ \hline
+11 & 8.2 Performance Benchmarks & 83 \\ \hline
+12 & 9.1 COCOMO Effort Estimation & 85 \\ \hline
+13 & 9.2 Project Cost Estimation & 86 \\ \hline
+14 & 9.3 Resource Allocation & 87 \\ \hline
+\end{tabular}
+\end{center}
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
 % ============================================================
 %                    MAIN REPORT
 % ============================================================
-\newpage
 
 % ============================================================
 %                    CHAPTER 1: INTRODUCTION
 % ============================================================
-\chapter{Introduction}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 1: Introduction}
+\chapterbanner{Chapter 1:\\ Introduction}
 
 \noindent Agricultural waste management is one of the most critical environmental challenges facing India today. Every year, approximately 500 million tonnes of crop residue is generated, out of which a significant portion is burned in open fields. This practice leads to severe air pollution, soil degradation, loss of nutrients, and contributes significantly to greenhouse gas emissions. The National Capital Region (NCR) witnesses hazardous air quality levels every winter, primarily due to stubble burning in neighboring states.
 
@@ -235,14 +338,14 @@ AgriTrace bridges this gap by providing a digital platform that connects farmers
 \noindent The aim of AgriTrace is to develop a comprehensive web-based platform for tracking, managing, and recycling agricultural waste. The platform facilitates the connection between farmers, waste collection agents, and recycling administrators through a role-based system that ensures efficient workflow management from waste generation to recycling completion.
 
 The specific aims include:
-\begin{itemize}
+\begin{enumerate}
     \item Provide farmers with a digital tool to report and list agricultural waste for collection.
     \item Enable collection agents to discover, claim, and manage waste pickup tasks efficiently.
     \item Empower administrators to oversee the entire waste management pipeline with analytics and user management capabilities.
     \item Track the environmental impact through carbon credit calculations.
     \item Incentivize participation through a gamification and rewards system.
     \item Integrate secure payment processing for waste transactions.
-\end{itemize}
+\end{enumerate}
 
 \section{Motivation}
 
@@ -264,17 +367,17 @@ The specific aims include:
 
 \noindent AgriTrace is built using a modern, production-grade technology stack carefully selected to deliver reliability, scalability, and excellent developer experience. The following is a brief overview of the core technologies used:
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Next.js 15.5:} A React-based framework providing server-side rendering (SSR), static site generation (SSG), API routes, and file-based routing. Next.js enables building full-stack web applications within a single codebase, eliminating the need for a separate backend server. It supports middleware, incremental static regeneration, and optimized image handling out of the box.
 
     \item \textbf{TypeScript 5.0:} A statically typed superset of JavaScript that provides compile-time type checking, enhanced IDE support, and improved code maintainability. TypeScript's type system catches errors during development rather than at runtime, significantly reducing bugs in production.
 
     \item \textbf{Firebase:} Google's Backend-as-a-Service (BaaS) platform, providing:
-    \begin{itemize}
+    \begin{enumerate}
         \item \textit{Cloud Firestore} -- A NoSQL document database with real-time synchronization capabilities and offline support.
         \item \textit{Firebase Authentication} -- Managed identity service supporting email/password, OAuth providers, and email verification.
         \item \textit{Firebase Storage} -- Cloud-based file storage for waste report photos and delivery proofs.
-    \end{itemize}
+    \end{enumerate}
 
     \item \textbf{Tailwind CSS:} A utility-first CSS framework that enables rapid UI development through composable utility classes. Combined with a custom design system, Tailwind CSS ensures visual consistency across all components.
 
@@ -285,43 +388,19 @@ The specific aims include:
     \item \textbf{Google Genkit AI:} A framework for building AI-powered features. AgriTrace uses Genkit for intelligent waste classification, helping farmers identify waste types through AI-assisted categorization.
 
     \item \textbf{Cloudinary:} A cloud-based media management service used for uploading, storing, and optimizing waste report photographs with automatic image compression and format conversion.
-\end{itemize}
+\end{enumerate}
 
-\section{Organization of the Report}
-
-\noindent This report is organized into fourteen chapters, each covering a specific aspect of the project:
-
-\begin{itemize}
-    \item \textbf{Chapter 1 -- Introduction:} Provides the background, aim, motivation, and technology overview of the AgriTrace project.
-    \item \textbf{Chapter 2 -- Problem Statement:} Defines the problem being addressed with supporting statistics and analysis of existing solutions.
-    \item \textbf{Chapter 3 -- Literature Survey:} Reviews existing research and systems related to agricultural waste management, digital platforms, and the technologies used.
-    \item \textbf{Chapter 4 -- Objectives and Scope:} Lists the specific objectives and defines the boundaries and scope of the project.
-    \item \textbf{Chapter 5 -- Requirement Analysis:} Documents the hardware and software requirements along with functional and non-functional requirements.
-    \item \textbf{Chapter 6 -- Methodology:} Describes the Agile Scrum development methodology adopted, including sprint planning and development tools.
-    \item \textbf{Chapter 7 -- System Design and Modeling:} Presents the system's design through Gantt charts, data flow diagrams, use case diagrams, activity diagrams, ER diagrams, and other UML models.
-    \item \textbf{Chapter 8 -- Coding:} Contains the key source code modules with detailed explanations of backend services, authentication, location services, notifications, payments, and UI components.
-    \item \textbf{Chapter 9 -- Output:} Showcases the application's user interface with screenshots of all major screens.
-    \item \textbf{Chapter 10 -- Testing:} Documents the test cases, testing methodologies, and results.
-    \item \textbf{Chapter 11 -- Cost Estimation:} Provides cost analysis using COCOMO model and itemized project expenditures.
-    \item \textbf{Chapter 12 -- Applications and Future Enhancements:} Discusses real-world applications and planned improvements.
-    \item \textbf{Chapter 13 -- Conclusion:} Summarizes the achievements, lessons learned, and closing remarks.
-    \item \textbf{Chapter 14 -- Bibliography:} Lists all references and sources cited in this report.
-\end{itemize}
-
-
-% ============================================================
-%                    CHAPTER 2: PROBLEM STATEMENT
-% ============================================================
-\chapter{Problem Statement}
+\addcontentsline{toc}{chapter}{Chapter 2: Problem Statement}
+\chapterbanner{Chapter 2:\\ Problem Statement}
 
 \noindent India generates approximately 500 million tonnes of agricultural waste annually. A substantial portion of this waste, particularly in states like Punjab, Haryana, and Uttar Pradesh, is burned in open fields due to the lack of economically viable and logistically feasible alternatives. This practice results in:
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Air Pollution:} Stubble burning contributes to severe air quality deterioration, with PM 2.5 levels reaching hazardous levels in the Indo-Gangetic plains.
     \item \textbf{Health Hazards:} Respiratory diseases, cardiovascular issues, and allergic reactions increase significantly during the burning season.
     \item \textbf{Soil Degradation:} Burning destroys beneficial soil microorganisms, reduces organic carbon content, and diminishes soil fertility over time.
     \item \textbf{Greenhouse Gas Emissions:} Agricultural burning releases CO\textsubscript{2}, CO, CH\textsubscript{4}, and N\textsubscript{2}O, contributing to climate change.
-\end{itemize}
+\end{enumerate}
 
 \section{State-wise Crop Residue Generation}
 
@@ -382,88 +461,21 @@ AgriTrace addresses this problem by creating a role-based web platform that digi
 % ============================================================
 %                    CHAPTER 3: LITERATURE SURVEY
 % ============================================================
-\chapter{Literature Survey}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 3: Literature Survey}
+\chapterbanner{Chapter 3:\\ Literature Survey}
 
-\noindent A thorough review of existing literature and systems was conducted to understand the current landscape of agricultural waste management and related technologies.
+\section{Literature Survey}
+\noindent Agricultural waste management has been extensively studied, but the integration of digital platforms remains relatively nascent. Several papers have explored the environmental impact of crop residue burning, noting that it contributes to nearly 25\% of air pollution in Northern India during winter months. Previous attempts to manage this waste focused primarily on mechanical solutions (like Happy Seeders) or localized composting, which suffer from high capital costs and logistical challenges.
 
-\section{Agricultural Waste Management in India}
+Digital platforms for waste management have been successfully deployed in urban solid waste management, but applying these to rural agriculture presents unique challenges. Research indicates that mobile-first architectures, offline capabilities, and vernacular language support are critical for adoption. Furthermore, the integration of real-time GPS tracking and AI-based image verification (e.g., using Google Genkit) represents a novel approach to ensuring transparency and accountability in the waste supply chain.
 
-\noindent Jain et al. (2014) estimated that approximately 92 million tonnes of crop residue are burned annually in India, contributing significantly to air pollution. Their study highlighted the need for technology-driven alternatives to open burning. The Indian Agricultural Research Institute (IARI) has documented the environmental and health impacts of stubble burning across multiple studies.
-
-\section{Digital Platforms for Waste Management}
-
-\noindent Several digital platforms have emerged for general waste management. Platforms like ``Swachhata'' by the Ministry of Housing focus on urban waste, while ``mKisan'' provides agricultural advisory services. However, none specifically address the agricultural waste tracking and recycling workflow that AgriTrace targets. The gap between general-purpose waste management apps and agricultural-specific requirements motivated the development of AgriTrace.
-
-\section{Firebase and Real-Time Database Systems}
-
-\noindent Google Firebase provides a comprehensive suite of backend services including Firestore (NoSQL database), Authentication, and Cloud Storage. Studies by Moroney (2017) have demonstrated Firebase's effectiveness in building real-time applications with offline support. The security rules system provides granular access control, which is critical for role-based applications like AgriTrace.
-
-\section{Next.js and Modern Web Frameworks}
-
-\noindent Next.js, developed by Vercel, has become the leading React framework for production applications. Version 15.5 introduces Turbopack for faster development builds and the App Router for improved routing and server components. TypeScript integration ensures type safety across the entire codebase.
-
-\section{Carbon Credit Systems}
-
-\noindent The carbon credit market has evolved significantly with the Paris Agreement. Studies by Pandey and Agrawal (2014) have quantified the carbon emissions from crop residue burning in India. AgriTrace uses scientifically established emission factors to calculate carbon offsets, with values ranging from 980 to 1400 kg CO\textsubscript{2} per metric tonne depending on waste type.
-
-\section{Payment Gateway Integration}
-
-\noindent Razorpay has emerged as India's leading payment gateway, supporting UPI, cards, and net banking. Its well-documented API and webhook system make it suitable for B2B and B2C transaction processing in agricultural marketplaces. Razorpay provides test mode capabilities, allowing developers to simulate payment flows without processing real transactions. The Orders API creates a server-side order with a specified amount, and the checkout.js library renders a user-facing payment modal that handles card validation, OTP verification, and payment confirmation. Upon successful payment, Razorpay generates a signature that must be verified server-side to prevent tampering.
-
-\section{IoT and Sensor-Based Waste Monitoring}
-
-\noindent Research by Kumar et al. (2020) explored IoT-based monitoring of agricultural waste burning using satellite imagery and ground-based sensors. Their work demonstrated that real-time monitoring can significantly improve enforcement of burning regulations. While AgriTrace does not directly integrate IoT sensors, its GPS-based location tracking and photo verification features serve a similar purpose by providing digital evidence of waste collection activities. Future versions of AgriTrace could incorporate IoT sensor data to automate waste quantity measurement and quality assessment.
-
-\section{Mobile-First Web Applications for Rural India}
-
-\noindent Studies by Patel et al. (2019) have highlighted the importance of mobile-first design for applications targeting rural Indian users. With smartphone penetration increasing rapidly in rural areas, web applications must be responsive, lightweight, and functional under intermittent network conditions. AgriTrace addresses this through responsive design using Tailwind CSS breakpoints, optimistic UI updates with Firebase's offline persistence, and progressive image loading for waste photographs. The application is designed to function meaningfully even on devices with limited bandwidth.
-
-\section{Tailwind CSS and Utility-First Design Systems}
-
-\noindent The utility-first CSS methodology, popularized by Tailwind CSS (Wathan, 2017), represents a paradigm shift from traditional CSS approaches. Rather than writing custom CSS classes, developers compose styles using atomic utility classes directly in HTML markup. Research by State of CSS Survey (2023) found that Tailwind CSS adoption has grown to over 50\% among professional developers, citing improved development speed, consistency, and reduced CSS bundle sizes as key benefits. AgriTrace leverages Tailwind's responsive modifiers (e.g., \texttt{sm:}, \texttt{md:}, \texttt{lg:}), dark mode support, and arbitrary value syntax to create a polished, consistent user interface.
-
-\section{Comparative Analysis of Existing Agricultural Platforms}
-
-\noindent The following table presents a comparative analysis of existing agricultural platforms and their limitations compared to AgriTrace:
-
-\begin{table}[h!]
-\centering
-\caption{Comparative Analysis of Existing Agricultural Platforms}
-\label{tab:comparative}
-\begin{tabular}{|p{2.5cm}|p{2cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|}
-\hline
-\textbf{Feature} & \textbf{Kisan Suvidha} & \textbf{mKisan} & \textbf{Swachhata} & \textbf{PUSA Decomposer} & \textbf{AgriTrace} \\
-\hline
-Waste Tracking & No & No & Partial & No & Yes \\
-\hline
-Collection Coordination & No & No & No & No & Yes \\
-\hline
-Payment Integration & No & No & No & No & Yes \\
-\hline
-Carbon Credits & No & No & No & No & Yes \\
-\hline
-Real-time Updates & No & Partial & Partial & No & Yes \\
-\hline
-Role-Based Access & No & No & Yes & No & Yes \\
-\hline
-GPS Location & Partial & No & Yes & No & Yes \\
-\hline
-Photo Verification & No & No & Yes & No & Yes \\
-\hline
-\end{tabular}
-\end{table}
-
-\noindent As the table demonstrates, AgriTrace addresses a unique combination of features that no existing platform currently provides, making it a novel contribution to the agricultural waste management domain.
-
-\section{Summary of Literature Review}
-
-\noindent From the literature survey, it is evident that while considerable research exists on agricultural waste management, digital platforms for waste management, and modern web technologies, there is a significant gap in integrated solutions that combine waste tracking, marketplace functionality, payment processing, carbon credit quantification, and gamification. AgriTrace is positioned to fill this gap by leveraging established technologies (Next.js, Firebase, Razorpay) in a novel application domain. The literature review also confirms the choice of Agile methodology, NoSQL databases, and responsive design as appropriate architectural decisions for this type of application.
+Our survey concludes that while individual technologies (IoT tracking, cloud databases, payment gateways) exist, a unified platform connecting farmers directly with recycling administrators under a Gamified and incentivized carbon-credit framework is highly necessary.
 
 
-% ============================================================
-%              CHAPTER 4: OBJECTIVES AND SCOPE
-% ============================================================
-\chapter{Objectives and Scope of the Project}
+\addcontentsline{toc}{chapter}{Chapter 4: Objectives and Scope of the Project}
+\chapterbanner{Chapter 4:\\ Objectives and Scope of the Project}
 
 \section{Project Objectives}
 
@@ -493,27 +505,30 @@ Photo Verification & No & No & Yes & No & Yes \\
 
 \noindent The scope of AgriTrace encompasses:
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{User Management:} Registration, authentication, role selection, profile management, and password reset functionality.
     \item \textbf{Farmer Module:} Waste reporting with photo uploads, listing creation, order tracking, carbon credit viewing, and payment receipt.
     \item \textbf{Agent Module:} Task discovery via nearby-tasks feature, listing claiming, pickup-to-delivery workflow management, delivery proof uploads, and earnings tracking.
     \item \textbf{Admin Module:} User management (edit roles, view all users), platform analytics, listing oversight, recycling status management, and statistics dashboard.
     \item \textbf{Notification System:} Real-time in-app notifications for status changes, new assignments, and system updates.
     \item \textbf{Responsive Design:} Full support for desktop, tablet, and mobile devices.
-\end{itemize}
+\end{enumerate}
 
 \noindent \textbf{Limitations:}
-\begin{itemize}
+\begin{enumerate}
     \item The platform currently does not support multi-language interfaces.
     \item Physical verification of waste quality is outside the scope of the digital platform.
     \item The carbon credit values are estimates based on published emission factors and are not certified by any regulatory body.
-\end{itemize}
+\end{enumerate}
 
 
 % ============================================================
 %              CHAPTER 5: REQUIREMENT ANALYSIS
 % ============================================================
-\chapter{Requirement Analysis}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 5: Requirement Analysis}
+\chapterbanner{Chapter 5:\\ Requirement Analysis}
 
 \section{Hardware Requirements}
 
@@ -673,66 +688,84 @@ NF-10 & Accessibility & All interactive elements shall have proper ARIA labels a
 % ============================================================
 %       CHAPTER 6: METHODOLOGY
 % ============================================================
-\chapter{Methodology}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 6: Methodology}
+\chapterbanner{Chapter 6:\\ Methodology}
 
-\noindent The development of AgriTrace followed an Agile methodology with iterative development cycles. The project was divided into sprints, each focusing on specific functional modules.
+\noindent The methodology is presented in the same flow as the synopsis: system architecture, modules of the system, and the algorithm.
 
-\section{Development Approach}
+\section{System Architecture}
 
-\noindent The Agile Scrum methodology was adopted for its flexibility and iterative nature. The development was organized into the following phases:
+\noindent AgriTrace follows a three-tier architecture to maintain separation of concerns and improve maintainability.
 
 \begin{enumerate}
-    \item \textbf{Requirement Gathering:} Studied the agricultural waste management ecosystem, identified stakeholder needs (farmers, agents, administrators), and defined functional and non-functional requirements.
-
-    \item \textbf{System Design:} Designed the system architecture using a component-based approach with Next.js App Router. Created data models for Firestore collections and defined security rules for role-based access control.
-
-    \item \textbf{Frontend Development:} Built the user interface using React components with TypeScript, styled using Tailwind CSS and Radix UI. Implemented responsive layouts for all device sizes.
-
-    \item \textbf{Backend Integration:} Configured Firebase services (Firestore, Authentication, Storage), implemented API routes for payment processing, and integrated location and notification services.
-
-    \item \textbf{Feature Implementation:} Developed core features including waste reporting, listing marketplace, payment integration, carbon credit tracking, and the rewards system.
-
-    \item \textbf{Testing and Debugging:} Performed unit testing, integration testing, and user acceptance testing. Applied ESLint and TypeScript type-checking for code quality.
-
-    \item \textbf{Deployment:} Deployed the application to Firebase Hosting with CI/CD pipeline integration.
+  \item \textbf{Presentation Layer:} Next.js pages and reusable React components provide role-based interfaces for Farmer, Agent, and Admin users.
+  \item \textbf{Application Layer:} API routes and service modules implement authentication checks, workflow transitions, notifications, and payment processing.
+  \item \textbf{Data Layer:} Firebase Firestore stores transactional data, Firebase Authentication manages identities, and Firebase Storage/Cloudinary handle media assets.
 \end{enumerate}
 
-\section{Sprint Breakdown}
-
-\noindent The development was organized into six two-week sprints. The following table summarizes the sprint plan:
-
-\begin{table}[h!]
+\begin{figure}[h!]
 \centering
-\caption{Sprint-wise Development Plan}
-\label{tab:sprints}
-\begin{tabular}{|p{1.5cm}|p{3cm}|p{7cm}|p{1.5cm}|}
-\hline
-\textbf{Sprint} & \textbf{Focus Area} & \textbf{Deliverables} & \textbf{Duration} \\
-\hline
-Sprint 1 & Project Setup & Next.js project initialization, Firebase configuration, authentication setup, role-based routing & 2 weeks \\
-\hline
-Sprint 2 & Core Features & Waste listing CRUD operations, Firestore data models, listing status workflow (OPEN $\rightarrow$ ASSIGNED $\rightarrow$ IN\_TRANSIT $\rightarrow$ DELIVERED) & 2 weeks \\
-\hline
-Sprint 3 & Dashboard UIs & Farmer dashboard, Agent dashboard, Admin dashboard with role-specific components and statistics cards & 2 weeks \\
-\hline
-Sprint 4 & Integrations & Razorpay payment gateway, Cloudinary photo uploads, GPS location services, notification system & 2 weeks \\
-\hline
-Sprint 5 & Advanced Features & Carbon credit tracking, rewards/gamification system, AI waste classification via Genkit, CSV export & 2 weeks \\
-\hline
-Sprint 6 & Polish \& Deploy & Responsive design refinements, performance optimization, security rules, accessibility improvements, deployment & 2 weeks \\
-\hline
-\end{tabular}
-\end{table}
+\begin{tikzpicture}[
+    layer/.style={rectangle, draw, rounded corners, fill=blue!10, minimum width=10cm, minimum height=1.5cm, align=center, font=\bfseries},
+    arrow/.style={-{Stealth[length=3mm]}, thick}
+]
 
-\section{Architecture Pattern}
+% Layers
+\node[layer, fill=green!15] (presentation) at (0, 4) {Presentation Layer (Next.js, Tailwind CSS, Radix UI)\\\normalfont\small Farmer, Agent, \& Admin Interfaces};
+\node[layer, fill=cyan!15] (application) at (0, 1.5) {Application Layer (Next.js API Routes, Services)\\\normalfont\small Auth, Payments, Business Logic, Genkit AI};
+\node[layer, fill=orange!15] (data) at (0, -1) {Data Layer (Firebase)\\\normalfont\small Firestore, Authentication, Cloud Storage, Cloudinary};
 
-\noindent AgriTrace employs a \textbf{three-tier architecture}:
+% Connections
+\draw[arrow] (presentation.south) -- (application.north);
+\draw[arrow] (application.south) -- (data.north);
 
-\begin{itemize}
-    \item \textbf{Presentation Layer:} React components with Next.js App Router, Tailwind CSS styling, and Radix UI primitives for accessible, composable UI elements.
-    \item \textbf{Application Layer:} Next.js API routes for server-side processing (Razorpay webhooks, admin operations), Firebase service functions for data operations, and custom React hooks for state management.
-    \item \textbf{Data Layer:} Firebase Firestore for persistent NoSQL storage, Firebase Authentication for identity management, and Firebase Storage for media files (waste photos, delivery proofs).
-\end{itemize}
+\draw[arrow] (application.north) ++(1.5,0) -- ++(0,1) node[midway, right, font=\footnotesize] {Responses};
+\draw[arrow] (presentation.south) ++(-1.5,0) -- ++(0,-1) node[midway, left, font=\footnotesize] {Requests};
+
+\draw[arrow] (data.north) ++(1.5,0) -- ++(0,1) node[midway, right, font=\footnotesize] {Data Fetch};
+\draw[arrow] (application.south) ++(-1.5,0) -- ++(0,-1) node[midway, left, font=\footnotesize] {Queries/Mutations};
+
+\end{tikzpicture}
+\caption{Three-Tier System Architecture}
+\label{fig:architecture}
+\end{figure}
+
+\section{Modules of the System}
+\noindent The AgriTrace system is composed of several tightly integrated modules that handle the end-to-end lifecycle of agricultural waste management. The key modules include:
+\begin{enumerate}
+    \item \textbf{Authentication and Role Management:} Handles secure login and registration for Farmers, Agents, and Administrators, utilizing Firebase Authentication. It securely routes users to their respective dashboards based on their roles.
+    \item \textbf{Farmer Module (Waste Reporting):} Enables farmers to list their agricultural waste by category, quantity, and price. It includes a geolocation service to tag the exact coordinates of the farm and an image upload utility for visual verification.
+    \item \textbf{Agent Module (Collection Logistics):} Provides collection agents with a map-based or list-based view of available waste tasks. Agents can claim tasks, navigate to the farm using optimized routes, and update the status of the waste to "In Transit".
+    \item \textbf{Admin and Analytics Module:} Gives administrators a global view of the system. It tracks total waste diverted, carbon credits generated, and manages users. It utilizes Recharts for real-time visual analytics.
+    \item \textbf{Payment and Incentives Module:} Integrates Razorpay to facilitate secure, instant payments from recyclers to farmers upon successful delivery of waste. It also calculates carbon credits awarded per transaction.
+\end{enumerate}
+
+\subsection{Waste Task Allocation Algorithm}
+\noindent The core algorithm utilized by the platform for matching collection agents with nearby farmers is based on a localized greedy-matching heuristic combined with Haversine distance calculations.
+
+\begin{lstlisting}[language=Python, caption={Agent-Task Matching Algorithm}]
+def allocate_tasks(agent_location, available_tasks, max_radius_km):
+    eligible_tasks = []
+    
+    # Filter and calculate distance for all OPEN tasks
+    for task in available_tasks:
+        if task.status == 'OPEN':
+            dist = haversine(agent_location, task.location)
+            if dist <= max_radius_km:
+                eligible_tasks.append({
+                    'task': task,
+                    'distance': dist,
+                    'priority_score': calculate_priority(task.quantity, dist)
+                })
+                
+    # Sort by highest priority (combination of proximity and waste volume)
+    eligible_tasks.sort(key=lambda x: x['priority_score'], reverse=True)
+    
+    return eligible_tasks
+\end{lstlisting}
+
 
 \section{Development Tools and Environment}
 
@@ -764,32 +797,33 @@ Prettier & 3.x & Code formatting and style enforcement \\
 \hline
 Chrome DevTools & -- & Browser debugging and performance profiling \\
 \hline
-Postman & 10.x & API testing and documentation \\
+
 \hline
 \end{tabular}
 \end{table}
-
-\section{Data Flow}
-
-\noindent The data flow in AgriTrace follows a unidirectional pattern:
-
-\begin{enumerate}
-    \item Farmer creates a waste listing with details (type, quantity, location, photos).
-    \item Listing is stored in Firestore and becomes visible to agents.
-    \item Agent claims the listing and initiates pickup.
-    \item Agent marks the waste as ``In Transit'' and later as ``Delivered''.
-    \item Admin can mark listings as ``Recycled'' after processing.
-    \item Carbon credits are calculated based on waste type and quantity.
-    \item Payment is processed through Razorpay upon delivery confirmation.
-    \item Notifications are sent to relevant parties at each status change.
-\end{enumerate}
 
 
 % ============================================================
 %       CHAPTER 7: SYSTEM DESIGN AND MODELING
 % ============================================================
-\chapter{System Design and Modeling}
+\refstepcounter{chapter}
+\setcounter{section}{0}
 
+
+\section{Razorpay Integration Methodology}
+\noindent The payment processing architecture of AgriTrace relies on a robust integration with the Razorpay API to ensure seamless, secure, and instant financial transactions between waste purchasers (recyclers) and the farmers.
+
+\begin{enumerate}
+    \item \textbf{Order Creation:} When a collection agent successfully delivers the waste and initiates payment, the Next.js backend generates a unique Razorpay Order ID securely using server-side API routes.
+    \item \textbf{Client-Side Checkout:} The Order ID is passed to the frontend component which invokes the Razorpay checkout modal. The modal handles the sensitive payment details (cards, UPI, net banking) completely isolated from the AgriTrace servers, maintaining PCI-DSS compliance.
+    \item \textbf{Webhook Verification:} Upon successful payment, Razorpay triggers a secure webhook to the AgriTrace backend. The system mathematically verifies the `razorpay\_signature` using the HMAC SHA256 algorithm and the merchant secret key to prevent spoofing.
+    \item \textbf{State Update:} Only after signature verification is the waste listing marked as "PAID" and "DELIVERED" in the Firestore database, executing an atomic transaction to ensure data integrity.
+\end{enumerate}
+
+\addcontentsline{toc}{chapter}{Chapter 7: System Design and Modeling}
+\chapterbanner{Chapter 7:\\ System Design and Modeling}
+
+\clearpage
 \section{Gantt Chart}
 
 \begin{figure}[h!]
@@ -825,6 +859,7 @@ Postman & 10.x & API testing and documentation \\
 \label{fig:gantt}
 \end{figure}
 
+\clearpage
 \section{DFD (Data Flow Diagram)}
 
 \begin{figure}[h!]
@@ -859,6 +894,7 @@ Postman & 10.x & API testing and documentation \\
 \label{fig:dfd}
 \end{figure}
 
+\clearpage
 \section{Flow Diagram}
 
 \begin{figure}[h!]
@@ -894,6 +930,7 @@ Postman & 10.x & API testing and documentation \\
 \label{fig:flow}
 \end{figure}
 
+\clearpage
 \section{Use Case Diagram}
 
 \begin{figure}[h!]
@@ -938,6 +975,7 @@ Postman & 10.x & API testing and documentation \\
 \label{fig:usecase}
 \end{figure}
 
+\clearpage
 \section{Activity Diagram}
 
 \begin{figure}[h!]
@@ -981,6 +1019,7 @@ Postman & 10.x & API testing and documentation \\
 \label{fig:activity}
 \end{figure}
 
+\clearpage
 \section{ER Diagram}
 
 \begin{figure}[h!]
@@ -1155,76 +1194,58 @@ notifications & createdAt & timestamp & Notification creation time \\
 
 \noindent The AgriTrace application follows a hierarchical component structure aligned with the Next.js App Router pattern. The following describes the component tree:
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Root Layout} (\texttt{app/layout.tsx})
-    \begin{itemize}
+    \begin{enumerate}
         \item \texttt{AuthProvider} -- Wraps the entire app with authentication context
         \item \texttt{Toaster} -- Global toast notification component
         \item \textbf{Landing Page} (\texttt{app/page.tsx}) -- Public-facing homepage
         \item \textbf{Login Page} (\texttt{app/login/page.tsx})
-        \begin{itemize}
+        \begin{enumerate}
             \item \texttt{LoginForm} -- Email/password input with validation
             \item \texttt{TestimonialCarousel} -- Rotating user testimonials
-        \end{itemize}
+        \end{enumerate}
         \item \textbf{Signup Page} (\texttt{app/signup/page.tsx})
-        \begin{itemize}
+        \begin{enumerate}
             \item \texttt{SignupForm} -- Registration with role selection
-        \end{itemize}
+        \end{enumerate}
         \item \textbf{Dashboard Page} (\texttt{app/dashboard/page.tsx})
-        \begin{itemize}
+        \begin{enumerate}
             \item \texttt{FarmerDashboard} -- Farmers-only content
-            \begin{itemize}
+            \begin{enumerate}
                 \item \texttt{StatCard} -- Statistics display cards
                 \item \texttt{PhotoUploader} -- Image upload component
                 \item \texttt{LocationPicker} -- GPS coordinate capture
                 \item \texttt{PaymentButton} -- Razorpay integration
                 \item \texttt{ListingCard} -- Individual listing display
-            \end{itemize}
+            \end{enumerate}
             \item \texttt{AgentDashboard} -- Agents-only content
-            \begin{itemize}
+            \begin{enumerate}
                 \item \texttt{StatCard} -- Statistics display cards
                 \item \texttt{TaskCard} -- Available/claimed task cards
-            \end{itemize}
-        \end{itemize}
+            \end{enumerate}
+        \end{enumerate}
         \item \textbf{Admin Page} (\texttt{app/admin/page.tsx})
-        \begin{itemize}
+        \begin{enumerate}
             \item \texttt{AdminStatCards} -- Platform-wide statistics
             \item \texttt{UserManagement} -- User list with role editing
             \item \texttt{ListingManagement} -- All listings with recycling controls
             \item \texttt{AnalyticsCharts} -- Recharts-based data visualizations
-        \end{itemize}
+        \end{enumerate}
         \item \textbf{Shared Components} (\texttt{components/ui/})
-        \begin{itemize}
+        \begin{enumerate}
             \item \texttt{Button}, \texttt{Dialog}, \texttt{Card}, \texttt{Badge} -- Radix UI primitives
             \item \texttt{Select}, \texttt{Input}, \texttt{Label} -- Form elements
             \item \texttt{Toast}, \texttt{Tabs}, \texttt{Sheet} -- Interactive elements
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\section{Security Architecture}
-
-\noindent The security architecture of AgriTrace operates at multiple levels:
-
-\begin{enumerate}
-    \item \textbf{Transport Layer:} All communication between the client and Firebase services is encrypted using TLS 1.3. The application is served over HTTPS, ensuring data confidentiality in transit.
-
-    \item \textbf{Authentication Layer:} Firebase Authentication manages user identity with industry-standard practices including secure password hashing (bcrypt), session token management, and automatic token refresh. Password reset flows use time-limited, single-use tokens sent via email.
-
-    \item \textbf{Authorization Layer:} Firestore Security Rules enforce role-based access control (RBAC) at the database level. Rules check the authenticated user's UID and role before allowing read/write operations. Key rules include:
-    \begin{itemize}
-        \item Users can only modify their own profile documents
-        \item Listings can only be deleted by their creators
-        \item Admin-only operations check for the admin role in the user's profile document
-        \item Delete operations on critical collections (users, orders) are universally denied
-    \end{itemize}
-
-    \item \textbf{Application Layer:} Client-side route guards redirect unauthenticated users to the login page. Role-based component rendering ensures that UI elements are only shown to authorized users. API routes validate authentication headers before processing requests.
-
-    \item \textbf{Payment Security:} Razorpay credentials are stored as server-side environment variables, never exposed to the client. Payment verification uses cryptographic signature matching to prevent amount tampering. The payment flow creates server-side orders, ensuring the payment amount is controlled by the server.
+        \end{enumerate}
+    \end{enumerate}
 \end{enumerate}
+
 % ============================================================
-\chapter{Coding}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 8: Coding}
+\chapterbanner{Chapter 8:\\ Coding}
 
 \noindent This chapter presents the key code modules of the AgriTrace platform. The codebase follows a modular architecture with clear separation of concerns.
 
@@ -1926,234 +1947,34 @@ export async function cancelListing(
 
 \noindent Each function targets a specific listing document by ID and atomically updates both the status field and the \texttt{updatedAt} timestamp. The status transitions follow a strict sequence: OPEN $\rightarrow$ ASSIGNED $\rightarrow$ IN\_TRANSIT $\rightarrow$ DELIVERED $\rightarrow$ RECYCLED, with CANCELLED available from any active state.
 % ============================================================
-\chapter{Output}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 9: Output}
+\chapterbanner{Chapter 9:\\ Output}
 
 \noindent This chapter presents the output of the AgriTrace platform, describing the user-facing interfaces and features across all modules. The descriptions are organized by functional area and cover the visual design, interactive elements, and data presentation for each screen.
 
-\section{Landing Page}
+\section{Project Screenshots}
 
-\noindent The AgriTrace landing page serves as the primary entry point for new and returning users. The page is designed with a modern, responsive layout that communicates the platform's value proposition effectively.
+\noindent The following screenshots show the key interfaces of the AgriTrace web application.
 
-\begin{itemize}
-    \item \textbf{Hero Section:} The top section features a bold headline (``Transform Agricultural Waste into Value'') with a gradient text effect, a descriptive subtitle explaining the platform's purpose, and two call-to-action buttons: ``Get Started'' (primary, links to signup) and ``Learn More'' (secondary, scrolls to features section). The background uses a subtle gradient from green to earth tones.
-
-    \item \textbf{Feature Bento Grid:} Below the hero, a CSS Grid-based bento layout showcases six core platform features:
-    \begin{enumerate}
-        \item \textit{Waste Tracking} -- End-to-end visibility from farm to recycling facility
-        \item \textit{Collection Management} -- Coordinated pickup logistics
-        \item \textit{Data Analytics} -- Real-time charts and statistics
-        \item \textit{Mobile Responsive} -- Optimized for all device sizes
-        \item \textit{Smart Verification} -- Photo-based waste verification
-        \item \textit{Complete History} -- Full audit trail of all transactions
-    \end{enumerate}
-    Each feature card includes a Lucide icon, title, and description with hover animation effects.
-
-    \item \textbf{Statistics Section:} An animated counter section displays key platform metrics (e.g., total waste diverted, active users, carbon offsets generated) with smooth number counting animations.
-
-    \item \textbf{Footer:} Contains navigation links, contact information, and copyright notice.
-\end{itemize}
-
-\section{Authentication Module}
-
-\subsection{Login Page}
-\noindent The login page provides a split-screen layout:
-\begin{itemize}
-    \item \textbf{Left Panel:} Contains the login form with:
-    \begin{itemize}
-        \item AgriTrace logo and welcome message
-        \item Email input field with icon prefix
-        \item Password input field with show/hide toggle
-        \item ``Forgot Password?'' link that triggers Firebase's password reset email flow
-        \item ``Sign In'' button with loading spinner during authentication
-        \item ``Don't have an account? Sign up'' link for new users
-    \end{itemize}
-
-    \item \textbf{Right Panel:} A decorative section featuring:
-    \begin{itemize}
-        \item Rotating testimonial cards with fade-in/fade-out animations
-        \item Each testimonial displays a user quote, name, role, and avatar
-        \item Three testimonials cycle every 5 seconds
-    \end{itemize}
-
-    \item \textbf{Error Handling:} Firebase error codes are mapped to user-friendly messages:
-    \begin{itemize}
-        \item ``auth/user-not-found'' $\rightarrow$ ``No account found with this email''
-        \item ``auth/wrong-password'' $\rightarrow$ ``Incorrect password''
-        \item ``auth/too-many-requests'' $\rightarrow$ ``Too many attempts. Try again later''
-    \end{itemize}
-\end{itemize}
-
-\subsection{Signup Page}
-\noindent The registration page allows new users to create accounts:
-\begin{itemize}
-    \item Name, email, and password fields with real-time validation
-    \item Role selection dropdown (Farmer, Agent) -- Admin role is assigned manually
-    \item Password strength indicator showing minimum requirements
-    \item Terms and conditions checkbox
-    \item Upon successful registration, users are redirected to a role-specific onboarding screen
-\end{itemize}
-
-\section{Farmer Dashboard}
-
-\noindent The Farmer Dashboard is the primary interface for agricultural waste producers. It is organized into several functional sections:
-
-\subsection{Statistics Panel}
-\noindent Four \texttt{StatCard} components display key metrics:
-\begin{enumerate}
-    \item \textbf{Total Listings:} Count of all listings ever created by the farmer
-    \item \textbf{Active Listings:} Count of listings in OPEN or ASSIGNED status
-    \item \textbf{Delivered:} Count of listings that have been delivered to recyclers
-    \item \textbf{Recycled:} Count of listings marked as fully recycled by admin
-\end{enumerate}
-Each card features a colored icon, metric value (with animated counter), and a brief description. The color coding provides visual differentiation: blue for total, green for active, amber for delivered, and purple for recycled.
-
-\subsection{Create New Listing}
-\noindent A dialog-based form allows farmers to create waste listings:
-\begin{itemize}
-    \item \textbf{Title:} Free-text input for listing name (e.g., ``Rice husk from paddy field'')
-    \item \textbf{Category:} Dropdown selector with options: Rice Husk, Rice Residue, Wheat Stubble, Sugarcane Bagasse, Cotton Stalks, Corn Stover, Paddy Straw, Coconut Shell, Groundnut Shell, Mustard Stalks, Other
-    \item \textbf{Quantity:} Numeric input in metric tonnes
-    \item \textbf{Price:} Price per unit in Indian Rupees (INR)
-    \item \textbf{Description:} Multi-line textarea for additional details
-    \item \textbf{Location:} GPS-based \texttt{LocationPicker} component that captures coordinates and displays a reverse-geocoded address
-    \item \textbf{Photos:} \texttt{PhotoUploader} component allowing multiple image uploads (up to 5 images) via Cloudinary
-\end{itemize}
-
-\subsection{Listing Management}
-\noindent Two tabs organize the farmer's listings:
-\begin{itemize}
-    \item \textbf{Active Listings:} Shows all listings not in CANCELLED or RECYCLED status. Each card displays the title, category badge, quantity, price, status badge (color-coded), assigned agent (if applicable), and creation date. A ``Cancel'' button is available for OPEN listings.
-    \item \textbf{Completed Listings:} Shows RECYCLED and CANCELLED listings with delivery/cancellation timestamps.
-\end{itemize}
-
-\subsection{CSV Export}
-\noindent A ``Download CSV'' button generates a comma-separated file containing all listing data (title, category, quantity, price, status, dates) for offline record-keeping and accounting purposes.
-
-\section{Agent Dashboard}
-
-\noindent The Agent Dashboard provides collection agents with task management capabilities:
-
-\subsection{Statistics Panel}
-\noindent Four \texttt{StatCard} components display agent-specific metrics:
-\begin{enumerate}
-    \item \textbf{Available Tasks:} Count of OPEN listings available for claiming
-    \item \textbf{Assigned Tasks:} Count of listings assigned to this agent
-    \item \textbf{In Transit:} Count of listings currently being transported
-    \item \textbf{Delivered:} Count of successfully delivered listings
-\end{enumerate}
-
-\subsection{Available Tasks}
-\noindent A scrollable list of OPEN listings that the agent can claim. Each task card shows:
-\begin{itemize}
-    \item Listing title and category
-    \item Quantity and offered price
-    \item Farmer's location (address text and distance from agent's current location)
-    \item ``Claim'' button that atomically assigns the listing to the agent
-\end{itemize}
-
-\subsection{My Tasks}
-\noindent Shows all listings assigned to the current agent, organized by status:
-\begin{itemize}
-    \item \textbf{ASSIGNED:} ``Start Pickup'' button transitions the listing to IN\_TRANSIT
-    \item \textbf{IN\_TRANSIT:} ``Pay \& Deliver'' button triggers the integrated Razorpay payment flow. Upon successful verification of the payment signature, the system atomically updates the listing status to DELIVERED, marks the payment as PAID, and links the transaction's unique order ID to the listing document.
-    \item Action buttons use confirmation dialogs to prevent accidental status changes
-\end{itemize}
-
-\section{Admin Dashboard}
-
-\noindent The Admin Dashboard provides platform-wide oversight and management capabilities:
-
-\subsection{Platform Statistics}
-\noindent Comprehensive statistics cards display:
-\begin{itemize}
-    \item Total registered users (broken down by role: farmers, agents)
-    \item Total listings (broken down by status)
-    \item Total waste diverted (in metric tonnes)
-    \item Total carbon offsets generated (in kg CO\textsubscript{2})
-    \item Total transaction value (in INR)
-\end{itemize}
-
-\subsection{User Management}
-\noindent A tabular view of all registered users with columns for name, email, role, registration date, and verification status. Admin actions include:
-\begin{itemize}
-    \item Edit user role (change between farmer, agent, admin)
-    \item View user activity history
-    \item Filter users by role using tab-based navigation
-\end{itemize}
-
-\subsection{Listing Oversight}
-\noindent A complete view of all platform listings across all users. Admin-specific actions include:
-\begin{itemize}
-    \item Mark DELIVERED listings as ``Recycled'' to complete the waste lifecycle
-    \item View listing details including photos, location, and assignment history
-    \item Filter listings by status using dropdown selectors
-\end{itemize}
-
-\subsection{Analytics Dashboard}
-\noindent Interactive charts built with the Recharts library provide visual insights:
-\begin{itemize}
-    \item \textbf{Waste by Type:} Pie chart showing distribution of waste categories across all listings
-    \item \textbf{Collection Over Time:} Line/bar chart showing listing creation and completion trends over time
-    \item \textbf{Status Distribution:} Bar chart comparing listings across all status categories
-    \item Charts are responsive and include tooltips for detailed data inspection
-\end{itemize}
-
-\section{Payment Processing Flow}
-
-\noindent The Razorpay integration provides a complete payment workflow:
-\begin{enumerate}
-    \item The \texttt{PaymentButton} component appears on DELIVERED listings
-    \item Clicking the button triggers a server-side API call to create a Razorpay order
-    \item The Razorpay checkout modal opens with pre-filled amount and merchant details
-    \item The modal supports multiple payment methods: UPI (scan QR or enter UPI ID), debit/credit cards, net banking, and wallets
-    \item Upon successful payment, a success toast is displayed and the listing's payment status is updated
-    \item Payment confirmations are stored in the orders collection for audit purposes
-\end{enumerate}
-
-\section{Notification System}
-
-\noindent The notification system provides real-time updates through an in-app notification center:
-\begin{itemize}
-    \item A bell icon in the navigation header displays the unread notification count as a badge
-    \item Clicking the bell opens a dropdown panel showing recent notifications
-    \item Notification types include:
-    \begin{itemize}
-        \item \textit{Info:} General platform updates and announcements
-        \item \textit{Success:} Successful operations (listing created, payment received)
-        \item \textit{Warning:} Action required (new listing claimed, pickup started)
-        \item \textit{Error:} Failed operations or system issues
-    \end{itemize}
-    \item Each notification can be marked as read individually
-    \item Notifications are sorted by creation time (newest first)
-\end{itemize}
-
-\section{Carbon Credits Display}
-
-\noindent The carbon credits section provides environmental impact quantification:
-\begin{itemize}
-    \item A dedicated panel on the farmer dashboard shows total carbon offsets earned
-    \item Individual listing contributions are itemized with waste type, quantity, and calculated CO\textsubscript{2} savings
-    \item A cumulative progress bar shows progress toward environmental milestones
-    \item Carbon offset values are calculated using the scientifically established factors defined in the \texttt{CARBON\_FACTORS} constant
-\end{itemize}
-
-\section{Responsive Design}
-
-\noindent The application adapts its layout across three primary breakpoints:
-\begin{itemize}
-    \item \textbf{Desktop (1024px+):} Full-width layout with sidebar navigation, multi-column card grids, and side-by-side form layouts
-    \item \textbf{Tablet (768px--1023px):} Reduced column count (2-column grids), collapsible navigation, and stacked form fields
-    \item \textbf{Mobile (below 768px):} Single-column layout, hamburger menu navigation, full-width cards, and bottom sheet dialogs instead of modal dialogs
-\end{itemize}
-
-\noindent Tailwind CSS responsive modifiers (\texttt{sm:}, \texttt{md:}, \texttt{lg:}, \texttt{xl:}) are used consistently throughout the codebase to implement these breakpoints.
-
-\textit{Note: Actual screenshots should be captured from the running application and inserted here using \texttt{\textbackslash includegraphics} commands.}
+\projectscreenshot{images/output-landing-new.png}{Landing Page}{fig:output-landing}
+\projectscreenshot{images/output-features-new.png}{Features Section}{fig:output-features}
+\projectscreenshot{images/output-login-new.png}{Login Page}{fig:output-login}
+\projectscreenshot{images/output-signup-new.png}{Sign Up Page}{fig:output-signup}
+\projectscreenshot{images/output-farmer-new.png}{Farmer Dashboard}{fig:output-farmer}
+\projectscreenshot{images/output-agent-page-new.png}{Agent Dashboard}{fig:output-agent}
+\projectscreenshot{images/output-razorpay-new.png}{Razorpay Checkout}{fig:output-razorpay}
+\projectscreenshot{images/output-payment-confirmation-new.png}{Payment Confirmation}{fig:output-payment}
+\projectscreenshot{images/output-contact-us-new.png}{Contact Us Page}{fig:output-contact}
 
 % ============================================================
 %              CHAPTER 10: TESTING
 % ============================================================
-\chapter{Testing}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 10: Testing}
+\chapterbanner{Chapter 10:\\ Testing}
 
 \section{Testing Methodology}
 
@@ -2181,7 +2002,8 @@ Each card features a colored icon, metric value (with animated counter), and a b
 
 \noindent Comprehensive testing was performed across all modules of the AgriTrace platform. The following table presents key test cases:
 
-\begin{longtable}{|p{0.8cm}|p{2.5cm}|p{3cm}|p{3.5cm}|p{3.5cm}|p{1.2cm}|}
+\small
+\begin{longtable}{|C{0.9cm}|L{2.2cm}|L{2.6cm}|L{3.2cm}|L{3.2cm}|C{1.1cm}|}
 \hline
 \textbf{ID} & \textbf{Module} & \textbf{Test Case} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
 \hline
@@ -2249,6 +2071,7 @@ TC30 & Performance & Dashboard load time & Page loads within 3 seconds & Loaded 
 \caption{Test Cases and Results}
 \label{tab:testcases}
 \end{longtable}
+\normalsize
 
 \section{Performance Benchmarks}
 
@@ -2285,34 +2108,37 @@ TypeScript Compilation & $<$ 30 seconds & 12 seconds & Pass \\
 
 \noindent All 30 test cases passed successfully. Key findings from the testing process:
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Zero Critical Bugs:} No critical or blocking issues were found during the final testing phase.
     \item \textbf{Type Safety:} TypeScript's strict mode caught 23 potential runtime errors during compilation that would have been undetectable in plain JavaScript.
     \item \textbf{Security Compliance:} All Firestore security rules properly enforce role-based access. No unauthorized data access was possible during penetration testing.
     \item \textbf{Performance:} All pages load within the 3-second target on standard broadband connections. Firestore query performance averages 180ms across all tested operations.
     \item \textbf{Cross-Browser:} The application renders consistently across all tested browsers with no layout breaking or functionality loss.
-\end{itemize}
+\end{enumerate}
 
 
 % ============================================================
 %         CHAPTER 11: PROJECT COST ESTIMATION
 % ============================================================
-\chapter{Project Cost Estimation}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 11: Project Cost Estimation}
+\chapterbanner{Chapter 11:\\ Project Cost Estimation}
 
 \section{COCOMO Model Estimation}
 
 \noindent The Constructive Cost Model (COCOMO) is used to estimate the effort, development time, and team size required for the AgriTrace project. The Basic COCOMO model uses the following formulas:
 
-\begin{itemize}
+\begin{enumerate}
     \item Effort (E) = $a \times (KLOC)^b$ person-months
     \item Development Time (D) = $c \times (E)^d$ months
     \item People Required (P) = E / D
-\end{itemize}
+\end{enumerate}
 
 \noindent For a semi-detached software project:
-\begin{itemize}
+\begin{enumerate}
     \item $a = 3.0$, $b = 1.12$, $c = 2.5$, $d = 0.35$
-\end{itemize}
+\end{enumerate}
 
 \noindent \textbf{Estimation:} The AgriTrace codebase comprises approximately 8.5 KLOC (thousand lines of code), including TypeScript source files, configuration files, and Firestore security rules.
 
@@ -2413,13 +2239,13 @@ Pen Drive & Project softcopy \& PPT & 300 \\
 \hline
 \textbf{Team Member} & \textbf{Primary Role} & \textbf{Responsibilities} \\
 \hline
-Member 1 & Frontend Developer & Dashboard UIs, responsive design, Tailwind CSS styling \\
+Rahul Tukaram Shendkar & Frontend Developer & Dashboard UIs, responsive design, Tailwind CSS styling \\
 \hline
-Member 2 & Backend Developer & Firebase services, API routes, Razorpay integration \\
+Tushar Tulashidas Pawar & Backend Developer & Firebase services, API routes, Razorpay integration \\
 \hline
-Member 3 & Full-Stack Developer & Authentication, location services, notifications \\
+Karan Naganath Bandgar & Full-Stack Developer & Authentication, location services, notifications \\
 \hline
-Member 4 & Testing \& Documentation & Test cases, security rules, project report \\
+Saurabh Balasaheb Zendage & Testing \& Documentation & Test cases, security rules, project report \\
 \hline
 \end{tabular}
 \end{table}
@@ -2428,7 +2254,10 @@ Member 4 & Testing \& Documentation & Test cases, security rules, project report
 % ============================================================
 %  CHAPTER 12: APPLICATIONS AND FUTURE ENHANCEMENTS
 % ============================================================
-\chapter{Applications and Future Enhancements}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 12: Applications and Future Enhancements}
+\chapterbanner{Chapter 12:\\ Applications and Future Enhancements}
 
 \section{Real-World Applications}
 
@@ -2486,7 +2315,10 @@ Member 4 & Testing \& Documentation & Test cases, security rules, project report
 % ============================================================
 %              CHAPTER 13: CONCLUSION
 % ============================================================
-\chapter{Conclusion}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 13: Conclusion}
+\chapterbanner{Chapter 13:\\ Conclusion}
 
 \noindent AgriTrace successfully demonstrates how modern web technologies can be leveraged to address one of India's most pressing environmental challenges---agricultural waste management. The platform provides a comprehensive, end-to-end solution that connects farmers, waste collection agents, and recycling administrators through an intuitive, role-based digital ecosystem.
 
@@ -2532,7 +2364,7 @@ Member 4 & Testing \& Documentation & Test cases, security rules, project report
 
 \noindent AgriTrace has the potential to create significant social and environmental impact:
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Air Quality Improvement:} By diverting agricultural waste from open burning, the platform directly contributes to reducing air pollution in affected regions, potentially improving air quality for millions of people.
 
     \item \textbf{Farmer Income Generation:} Farmers earn revenue from waste that would otherwise be burned, providing an additional income stream. The platform's transparent pricing ensures fair compensation.
@@ -2540,7 +2372,7 @@ Member 4 & Testing \& Documentation & Test cases, security rules, project report
     \item \textbf{Employment Creation:} The collection agent role creates employment opportunities in rural areas, particularly for youth who can leverage smartphone-based platforms for logistics work.
 
     \item \textbf{Sustainable Development Goals:} AgriTrace contributes to multiple UN Sustainable Development Goals, including SDG 13 (Climate Action), SDG 12 (Responsible Consumption and Production), SDG 3 (Good Health and Well-being), and SDG 8 (Decent Work and Economic Growth).
-\end{itemize}
+\end{enumerate}
 
 \vspace{1em}
 
@@ -2550,7 +2382,10 @@ Member 4 & Testing \& Documentation & Test cases, security rules, project report
 % ============================================================
 %              CHAPTER 14: BIBLIOGRAPHY
 % ============================================================
-\chapter{Bibliography}
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\addcontentsline{toc}{chapter}{Chapter 14: Bibliography}
+\chapterbanner{Chapter 14:\\ Bibliography}
 
 \begin{enumerate}
     \item[{[1]}] N. Jain, A. Bhatia, and H. Pathak, ``\textit{Emission of Air Pollutants from Crop Residue Burning in India},'' \textit{Aerosol and Air Quality Research}, Vol. 14, 2014, PP 422--430.

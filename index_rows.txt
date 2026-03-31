@@ -1,0 +1,72 @@
+=== LOF ===
+1 & 7.1 Project Development Gantt Chart & 33 \\ \hline
+2 & 7.2 Level 0 Data Flow Diagram & 33 \\ \hline
+3 & 7.3 Application Flow Diagram & 34 \\ \hline
+4 & 7.4 Use Case Diagram & 35 \\ \hline
+5 & 7.5 Activity Diagram & 36 \\ \hline
+6 & 7.6 Entity-Relationship Diagram & 36 \\ \hline
+7 & 9.1 Landing Page Hero Section & 61 \\ \hline
+8 & 9.2 Login Page & 62 \\ \hline
+9 & 9.3 Signup Page & 62 \\ \hline
+10 & 9.4 Farmer Dashboard & 63 \\ \hline
+11 & 9.5 Agent Dashboard & 63 \\ \hline
+12 & 9.6 Landing Page Workflow Section & 64 \\ \hline
+13 & 9.7 Razorpay Payment Gateway Page & 64 \\ \hline
+14 & 9.8 Payment Confirmation Page & 65 \\ \hline
+15 & 9.9 Contact Us Section & 65 \\ \hline
+16 & 9.10 Full Landing Page & 66 \\ \hline
+17 & 9.11 Features Section (Full) & 66 \\ \hline
+18 & 9.12 Compliance Section & 67 \\ \hline
+19 & 9.13 Call-to-Action and Footer Section & 67 \\ \hline
+20 & 9.14 Contact Section (Full) & 68 \\ \hline
+21 & 9.15 Login Screen (Full) & 68 \\ \hline
+22 & 9.16 Signup Screen (Full) & 69 \\ \hline
+23 & 9.17 Farmer Dashboard (Full) & 69 \\ \hline
+24 & 9.18 Agent Dashboard (Full) & 70 \\ \hline
+25 & 9.19 Razorpay Checkout (Full) & 70 \\ \hline
+26 & 9.20 Payment Confirmation (Full) & 71 \\ \hline
+27 & 9.21 Landing Page (Additional Capture) & 71 \\ \hline
+28 & 9.22 Features Section (Additional Capture) & 72 \\ \hline
+29 & 9.23 Login Screen (Additional Capture) & 72 \\ \hline
+30 & 9.24 Signup Screen (Additional Capture) & 73 \\ \hline
+31 & 9.25 Farmer Dashboard (Additional Capture) & 73 \\ \hline
+32 & 9.26 Agent Dashboard (Additional Capture) & 74 \\ \hline
+33 & 9.27 Razorpay Checkout (Additional Capture) & 74 \\ \hline
+34 & 9.28 Payment Confirmation (Additional Capture) & 75 \\ \hline
+35 & 9.29 Contact Section (Additional Capture) & 75 \\ \hline
+36 & 9.30 Landing Page (Submitted Output) & 76 \\ \hline
+37 & 9.31 Features Page (Submitted Output) & 76 \\ \hline
+38 & 9.32 Login Page (Submitted Output) & 77 \\ \hline
+39 & 9.33 Sign Up Page (Submitted Output) & 77 \\ \hline
+40 & 9.34 Farmer Page (Submitted Output) & 78 \\ \hline
+41 & 9.35 Agent Page (Submitted Output) & 78 \\ \hline
+42 & 9.36 Razorpay Page (Submitted Output) & 79 \\ \hline
+43 & 9.37 Payment Confirmation (Submitted Output) & 79 \\ \hline
+44 & 9.38 Contact Us Page (Submitted Output) & 80 \\ \hline
+45 & 9.39 Landing Page & 80 \\ \hline
+46 & 9.40 Features Page & 81 \\ \hline
+47 & 9.41 Login Page & 81 \\ \hline
+48 & 9.42 Sign Up Page & 82 \\ \hline
+49 & 9.43 Farmer Dashboard & 82 \\ \hline
+50 & 9.44 Agent Dashboard & 83 \\ \hline
+51 & 9.45 Razorpay Checkout & 83 \\ \hline
+52 & 9.46 Payment Confirmation & 84 \\ \hline
+53 & 9.47 Contact Us Page & 84 \\ \hline
+
+=== LOT ===
+1 & 2.1 State-wise Crop Residue Generation and Burning Estimates & 14 \\ \hline
+2 & 3.1 Comparative Analysis of Existing Agricultural Platforms & 19 \\ \hline
+3 & 5.1 Hardware Requirements & 24 \\ \hline
+4 & 5.2 Software Requirements & 24 \\ \hline
+5 & 5.3 Functional Requirements & 25 \\ \hline
+6 & 5.4 Non-Functional Requirements & 26 \\ \hline
+7 & 6.1 Sprint-wise Development Plan & 30 \\ \hline
+8 & 6.2 Development Tools & 31 \\ \hline
+9 & 7.1 Firestore Collection Schema -- Users & 35 \\ \hline
+10 & 7.2 Firestore Collection Schema -- Listings & 36 \\ \hline
+11 & 7.3 Firestore Collection Schema -- Orders and Notifications & 37 \\ \hline
+12 & 10.1 Test Cases and Results & 95 \\ \hline
+13 & 10.2 Performance Benchmarks & 96 \\ \hline
+14 & 11.1 COCOMO Effort Estimation & 98 \\ \hline
+15 & 11.2 Project Cost Estimation & 99 \\ \hline
+16 & 11.3 Resource Allocation & 100 \\ \hline
