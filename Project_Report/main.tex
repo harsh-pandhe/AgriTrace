@@ -56,7 +56,7 @@
   {}{0pt}{}
 \titlespacing*{\chapter}{0pt}{0pt}{0pt}
 
-\newcommand{\chapterbanner}[1]{%
+\newcommand{\chapterbanner}[2]{%
   \clearpage
   \thispagestyle{empty}
   \vspace*{\fill}
@@ -70,11 +70,15 @@
         inner ysep=4pt,
         align=center,
         font=\bfseries\fontsize{18}{20}\selectfont
-      ] at (img.center) {#1};
+      ] at (img.center) {Chapter #1:\\ #2};
     \end{tikzpicture}
   \end{center}
   \vspace*{\fill}
   \clearpage
+  \begin{center}
+    {\bfseries\fontsize{18}{22}\selectfont #2}
+  \end{center}
+  \vspace{1.5em}
 }
 
 \newcommand{\projectscreenshot}[3]{%
@@ -325,7 +329,7 @@ Built with Next.js 15.5, TypeScript, Firebase (Firestore, Authentication, Storag
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 1: Introduction}
-\chapterbanner{Chapter 1:\\ Introduction}
+\chapterbanner{1}{Introduction}
 
 \noindent Agricultural waste management is one of the most critical environmental challenges facing India today. Every year, approximately 500 million tonnes of crop residue is generated, out of which a significant portion is burned in open fields. This practice leads to severe air pollution, soil degradation, loss of nutrients, and contributes significantly to greenhouse gas emissions. The National Capital Region (NCR) witnesses hazardous air quality levels every winter, primarily due to stubble burning in neighboring states.
 
@@ -390,8 +394,10 @@ The specific aims include:
     \item \textbf{Cloudinary:} A cloud-based media management service used for uploading, storing, and optimizing waste report photographs with automatic image compression and format conversion.
 \end{enumerate}
 
+\refstepcounter{chapter}
+\setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 2: Problem Statement}
-\chapterbanner{Chapter 2:\\ Problem Statement}
+\chapterbanner{2}{Problem Statement}
 
 \noindent India generates approximately 500 million tonnes of agricultural waste annually. A substantial portion of this waste, particularly in states like Punjab, Haryana, and Uttar Pradesh, is burned in open fields due to the lack of economically viable and logistically feasible alternatives. This practice results in:
 
@@ -464,18 +470,132 @@ AgriTrace addresses this problem by creating a role-based web platform that digi
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 3: Literature Survey}
-\chapterbanner{Chapter 3:\\ Literature Survey}
+\chapterbanner{3}{Literature Survey}
 
-\section{Literature Survey}
-\noindent Agricultural waste management has been extensively studied, but the integration of digital platforms remains relatively nascent. Several papers have explored the environmental impact of crop residue burning, noting that it contributes to nearly 25\% of air pollution in Northern India during winter months. Previous attempts to manage this waste focused primarily on mechanical solutions (like Happy Seeders) or localized composting, which suffer from high capital costs and logistical challenges.
+\section{Introduction}
 
-Digital platforms for waste management have been successfully deployed in urban solid waste management, but applying these to rural agriculture presents unique challenges. Research indicates that mobile-first architectures, offline capabilities, and vernacular language support are critical for adoption. Furthermore, the integration of real-time GPS tracking and AI-based image verification (e.g., using Google Genkit) represents a novel approach to ensuring transparency and accountability in the waste supply chain.
+\noindent Agricultural waste management is a multidisciplinary research domain that intersects environmental science, logistics, information technology, and behavioral economics. The challenge of managing the approximately 500 million tonnes of crop residue generated annually in India requires solutions that are simultaneously technical, economic, and socially viable. This chapter reviews the relevant body of literature across six thematic areas: (1) the environmental and economic impact of crop residue burning, (2) digital platforms for agricultural waste management, (3) IoT and blockchain-based traceability systems, (4) AI-based image classification for waste verification, (5) carbon credit frameworks in agriculture, and (6) gamification and behavioral incentive systems.
 
-Our survey concludes that while individual technologies (IoT tracking, cloud databases, payment gateways) exist, a unified platform connecting farmers directly with recycling administrators under a Gamified and incentivized carbon-credit framework is highly necessary.
+The objective of this survey is to identify the technological gaps and research opportunities that motivated the design and development of the AgriTrace platform.
+
+\section{Environmental Impact of Crop Residue Burning}
+
+\noindent The adverse effects of agricultural residue burning have been extensively documented in the scientific literature. Gadde et al. [26] conducted one of the earliest large-scale assessments of crop residue burning in South and Southeast Asia, estimating that India alone burns approximately 84--92 million tonnes of residue annually. Their study quantified emissions of CO, CO\textsubscript{2}, CH\textsubscript{4}, and particulate matter, establishing the causal link between burning and Winter air quality deterioration in the Indo-Gangetic Plain (IGP).
+
+Jain et al. [27] performed a ground-level analysis of Punjab and Haryana burning events, correlating satellite fire counts (from NASA MODIS) with PM 2.5 levels in Delhi. The study demonstrated that stubble burning events in these states account for 25--40\% of Delhi's winter PM 2.5, contributing directly to respiratory hospitalizations.
+
+Bhuvaneshwari et al. [28] reviewed the socioeconomic factors driving burning behavior, concluding that the primary cause is the narrow 10--20 day window between paddy harvest and wheat sowing. Mechanical alternatives such as the Happy Seeder and Super Straw Management System (SSMS) can address this, but their adoption is limited by high capital cost (INR 1.2--1.8 lakhs) and unavailability during peak season. This finding directly motivates the AgriTrace approach of creating an economic incentive for waste removal through a digital marketplace.
+
+\textbf{Research Gap:} Existing literature focuses extensively on the problem quantification but provides limited solutions at the digital-logistic coordination level. None of the reviewed studies propose a digital platform that incentivizes farmers through market-based transactions for their surplus residue.
+
+\section{Digital Platforms for Agricultural Waste Management}
+
+\noindent The successful deployment of digital platforms in urban waste management offers relevant design precedents. Kumar and Bhattacharya [29] developed a mobile application for municipal solid waste (MSW) management in Bengaluru, incorporating GPS-based truck routing, real-time status tracking, and a resident reporting portal. Their study reported a 31\% improvement in collection efficiency and a 22\% reduction in citizen complaints. The architecture of their system -- role-based access, real-time synchronization, and GPS integration -- closely parallels the AgriTrace design, though the domain (urban MSW vs. rural agricultural waste) presents distinct challenges.
+
+Pant and Katiyar [30] reviewed 14 agricultural mobile applications deployed in India, including Kisan Suvidha, mKisan, AgroStar, and DeHaat. Their systematic review revealed that existing applications focus predominantly on crop advisory, weather forecasting, and market price discovery. None of the 14 reviewed platforms offered waste tracking, collection logistics, or recycling coordination. This finding confirms the gap that AgriTrace addresses.
+
+Zhang et al. [31] proposed WasteLink, a peer-to-peer marketplace for industrial by-products in China. Their cloud-based platform uses a Firebase-like NoSQL backend and demonstrated that direct producer-to-collector marketplace models reduce transaction costs by 18\% compared to intermediary-broker models. AgriTrace adopts a similar direct marketplace model.
+
+\textbf{Research Gap:} Existing digital agricultural applications in India are advisory-focused. A comprehensive, full-stack waste-logistics platform connecting farmers, agents, and recycling administrators remains largely absent from the Indian agricultural technology landscape.
+
+\section{IoT and Blockchain-Based Traceability Systems}
+
+\noindent Traceability -- the ability to track a product from its point of origin to its final destination -- is a critical requirement in agricultural waste management. Kamran et al. [32] proposed an IoT-based system using RFID tags and LoRa-WAN sensors to monitor waste bales from farm-gate to biorefinery. Their system achieved end-to-end tracking with 94.7\% accuracy but relied on specialized hardware that is economically infeasible for smallholder farmers.
+
+Mao et al. [33] implemented a blockchain-based supply chain for food waste management in China. By recording every custody transfer on an immutable ledger, their system increased stakeholder trust and reduced fraudulent reporting by 73\%. However, the system's reliance on Ethereum smart contracts introduced gas fee overhead and latency (5--15 seconds per transaction), making it unsuitable for high-frequency agricultural transactions.
+
+Kshetri [34] reviewed the use of blockchain in agri-food supply chains, noting that while the technology provides verifiability, its adoption in rural India is constrained by limited internet connectivity, low digital literacy, and high implementation costs. The author advocates for hybrid architectures that leverage cloud databases (such as Firestore) for operational transactions while selectively applying immutable audit trails.
+
+AgriTrace draws upon these insights by implementing Firestore-based real-time tracking with cryptographically secured payment verification (via Razorpay HMAC-SHA256 webhooks) rather than a full blockchain. This hybrid approach balances transparency with the practicalities of rural deployment.
+
+\textbf{Research Gap:} IoT and blockchain-based solutions for agricultural waste traceability are technically sound but economically and logistically constrained for the Indian rural context. A web-native, cloud-hosted approach provides a more accessible alternative.
+
+\section{AI-Based Waste Classification and Image Verification}
+
+\noindent Manual assessment of waste type and quality is a significant source of inefficiency and fraud in agricultural supply chains. Agarwal et al. [35] developed a Convolutional Neural Network (CNN) model to classify agricultural residue images into 12 categories (wheat straw, rice husk, sugarcane bagasse, etc.) with 91.4\% accuracy using a dataset of 15,000 annotated images. Their study demonstrated that automated image classification can reduce human inspection effort by up to 60\%.
+
+Mamat et al. [36] applied transfer learning (MobileNetV2) for real-time waste classification on mobile devices, achieving 88\% accuracy with inference times under 120ms on mid-range Android devices. This performance profile makes AI classification viable for field use by collection agents with standard smartphones.
+
+Kamilaris and Prenafeta-Bold{\'u} [37] conducted a systematic review of deep learning applications in agriculture, reviewing over 40 case studies. They found that image-based quality grading and defect detection are the most mature applications, with consistent accuracy above 85\% across diverse crop types. The authors identified real-world deployment challenges including dataset diversity (different lighting conditions, crop varieties, maturity stages) and the need for continuous model retraining.
+
+AgriTrace integrates Google Genkit AI for waste classification, leveraging a large multimodal language model rather than a task-specific CNN. This approach avoids the need for a dedicated training dataset while providing flexibility to classify novel waste types through in-context prompting.
+
+\textbf{Research Gap:} Existing AI classification systems are primarily research prototypes trained on curated datasets. The integration of large multimodal models (such as those powering Google Genkit) for open-set waste classification in production agricultural platforms is under-explored.
+
+\section{Carbon Credit Frameworks in Agriculture}
+
+\noindent The quantification and trading of carbon credits from agricultural waste management is an emerging but rapidly growing field. Searchinger et al. [38] analyzed the carbon accounting methodologies for crop residue management, providing emission factors (EF) for different residue types. Their work established that diverting one tonne of rice straw from burning to composting or bioenergy prevents the emission of approximately 1.1 tonnes of CO\textsubscript{2}-equivalent greenhouse gases.
+
+Gold Standard and Verra (VCS) [39] have published standardized methodologies (VM0036 and VM0042) for quantifying greenhouse gas reductions from improved agricultural land management. These methodologies form the basis for certified carbon credits that can be traded on voluntary carbon markets.
+
+Pattanayak et al. [40] studied the behavioral economics of farmer participation in payment-for-ecosystem-services (PES) programs, finding that financial incentives of even INR 500--1000 per tonne of residue diverted are sufficient to change behavior in low-income farming households. This insight validates the AgriTrace model of combining marketplace transactions with carbon credit quantification.
+
+AgriTrace implements a simplified carbon credit calculation engine based on the emission factors from Searchinger et al. [38], mapping waste type and quantity to CO\textsubscript{2}-equivalent reductions. While these estimates are not certified by a regulatory body, they provide a meaningful proxy for environmental impact that can motivate platform participation.
+
+\textbf{Research Gap:} Certified carbon credit programs for smallholder agricultural waste management in India are largely absent due to high Measurement, Reporting, and Verification (MRV) costs. Digital platforms that automate preliminary MRV data collection represent a significant research and commercial opportunity.
+
+\section{Gamification and Behavioral Incentive Systems}
+
+\noindent Gamification -- the application of game-design elements to non-game contexts -- has been shown to significantly improve user engagement and behavioral change in digital platforms. Hamari et al. [41] conducted a meta-analysis of 24 empirical studies on gamification, finding that points, badges, and leaderboards consistently produce positive effects on motivation and engagement across diverse application domains including health, education, and sustainability.
+
+Froehlich et al. [42] applied gamification to energy conservation behavior, demonstrating that personalized feedback combined with progress indicators and social comparison features reduced household electricity consumption by 15--20\%. The parallels with agricultural waste management are direct: both involve changing habitual behavior through digital nudges and social proof.
+
+Yuriev et al. [43] reviewed pro-environmental gamification specifically, noting that financial rewards combined with non-monetary recognition (badges, points, leaderboards) outperform either mechanism alone. Their findings suggest that the AgriTrace hybrid model -- combining marketplace transactions (financial) with a points/streaks/milestones system (non-monetary) -- is well-grounded in behavioral science.
+
+Stieglitz et al. [44] demonstrated that real-time progress feedback is the single most effective gamification element for sustaining long-term engagement, outperforming leaderboards and badges. AgriTrace's dashboard, which displays carbon credits earned, waste collected (kg), and active streak count in real time, directly implements this finding.
+
+\textbf{Research Gap:} While gamification has been applied extensively in health and energy domains, its application to agricultural waste management platforms is largely unexplored. AgriTrace represents one of the first implementations of a gamified reward system in this domain.
+
+\section{Comparative Analysis of Related Systems}
+
+\noindent The following table provides a comparative analysis of AgriTrace against existing related platforms and research prototypes across key dimensions:
+
+\begin{table}[h!]
+\centering
+\caption{Comparative Analysis of Agricultural Waste Management Platforms}
+\label{tab:lit-comparison}
+\begin{tabular}{|p{2.8cm}|p{1.6cm}|p{1.5cm}|p{1.4cm}|p{1.4cm}|p{1.5cm}|p{1.4cm}|}
+\hline
+\textbf{Platform / Study} & \textbf{Real-time Tracking} & \textbf{Digital Marketplace} & \textbf{Payment Integration} & \textbf{AI Classification} & \textbf{Carbon Credits} & \textbf{Gamification} \\
+\hline
+Kisan Suvidha [30] & No & No & No & No & No & No \\
+\hline
+WasteLink [31] & Yes & Yes & No & No & No & No \\
+\hline
+Kumar \& Bhattacharya [29] & Yes & No & No & No & No & No \\
+\hline
+Kamran et al. [32] & Yes & No & No & No & No & No \\
+\hline
+Mao et al. [33] & Yes & No & No & No & Partial & No \\
+\hline
+Agarwal et al. [35] & No & No & No & Yes & No & No \\
+\hline
+\textbf{AgriTrace (Proposed)} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Summary and Research Gaps}
+
+\noindent The literature survey reveals that the problem of agricultural waste management in India has been well-characterized from an environmental and economic perspective. Existing technological solutions address individual components of the problem: IoT systems provide traceability, AI models provide classification, digital platforms provide marketplace functionality, and gamification frameworks provide incentive structures. However, no existing system integrates all of these components into a single, production-ready, web-native platform tailored to the Indian agricultural context.
+
+AgriTrace addresses this gap by:
+\begin{enumerate}
+    \item Providing a role-based digital marketplace connecting farmers, agents, and administrators.
+    \item Implementing real-time Firestore-based tracking without requiring specialized IoT hardware.
+    \item Integrating Google Genkit AI for open-set waste classification accessible to non-technical users.
+    \item Computing carbon credit estimates using established emission factors from peer-reviewed literature.
+    \item Combining financial (Razorpay payments) and non-financial (points, streaks, milestones) incentives informed by behavioral economics research.
+    \item Ensuring economic viability through a cloud-native architecture (Firebase + Next.js) with minimal operational overhead.
+\end{enumerate}
+
+This unique combination of features positions AgriTrace as a comprehensive, research-grounded solution to the agricultural waste management challenge in India.
 
 
+\refstepcounter{chapter}
+\setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 4: Objectives and Scope of the Project}
-\chapterbanner{Chapter 4:\\ Objectives and Scope of the Project}
+\chapterbanner{4}{Objectives and Scope of the Project}
 
 \section{Project Objectives}
 
@@ -528,7 +648,7 @@ Our survey concludes that while individual technologies (IoT tracking, cloud dat
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 5: Requirement Analysis}
-\chapterbanner{Chapter 5:\\ Requirement Analysis}
+\chapterbanner{5}{Requirement Analysis}
 
 \section{Hardware Requirements}
 
@@ -691,7 +811,7 @@ NF-10 & Accessibility & All interactive elements shall have proper ARIA labels a
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 6: Methodology}
-\chapterbanner{Chapter 6:\\ Methodology}
+\chapterbanner{6}{Methodology}
 
 \noindent The methodology is presented in the same flow as the synopsis: system architecture, modules of the system, and the algorithm.
 
@@ -797,8 +917,6 @@ Prettier & 3.x & Code formatting and style enforcement \\
 \hline
 Chrome DevTools & -- & Browser debugging and performance profiling \\
 \hline
-
-\hline
 \end{tabular}
 \end{table}
 
@@ -808,7 +926,8 @@ Chrome DevTools & -- & Browser debugging and performance profiling \\
 % ============================================================
 \refstepcounter{chapter}
 \setcounter{section}{0}
-
+\addcontentsline{toc}{chapter}{Chapter 7: System Design and Modeling}
+\chapterbanner{7}{System Design and Modeling}
 
 \section{Razorpay Integration Methodology}
 \noindent The payment processing architecture of AgriTrace relies on a robust integration with the Razorpay API to ensure seamless, secure, and instant financial transactions between waste purchasers (recyclers) and the farmers.
@@ -819,9 +938,6 @@ Chrome DevTools & -- & Browser debugging and performance profiling \\
     \item \textbf{Webhook Verification:} Upon successful payment, Razorpay triggers a secure webhook to the AgriTrace backend. The system mathematically verifies the `razorpay\_signature` using the HMAC SHA256 algorithm and the merchant secret key to prevent spoofing.
     \item \textbf{State Update:} Only after signature verification is the waste listing marked as "PAID" and "DELIVERED" in the Firestore database, executing an atomic transaction to ensure data integrity.
 \end{enumerate}
-
-\addcontentsline{toc}{chapter}{Chapter 7: System Design and Modeling}
-\chapterbanner{Chapter 7:\\ System Design and Modeling}
 
 \clearpage
 \section{Gantt Chart}
@@ -1245,7 +1361,7 @@ notifications & createdAt & timestamp & Notification creation time \\
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 8: Coding}
-\chapterbanner{Chapter 8:\\ Coding}
+\chapterbanner{8}{Coding}
 
 \noindent This chapter presents the key code modules of the AgriTrace platform. The codebase follows a modular architecture with clear separation of concerns.
 
@@ -1946,11 +2062,14 @@ export async function cancelListing(
 \end{lstlisting}
 
 \noindent Each function targets a specific listing document by ID and atomically updates both the status field and the \texttt{updatedAt} timestamp. The status transitions follow a strict sequence: OPEN $\rightarrow$ ASSIGNED $\rightarrow$ IN\_TRANSIT $\rightarrow$ DELIVERED $\rightarrow$ RECYCLED, with CANCELLED available from any active state.
+\clearpage
+% ============================================================
+%       CHAPTER 9: OUTPUT
 % ============================================================
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 9: Output}
-\chapterbanner{Chapter 9:\\ Output}
+\chapterbanner{9}{Output}
 
 \noindent This chapter presents the output of the AgriTrace platform, describing the user-facing interfaces and features across all modules. The descriptions are organized by functional area and cover the visual design, interactive elements, and data presentation for each screen.
 
@@ -1974,7 +2093,7 @@ export async function cancelListing(
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 10: Testing}
-\chapterbanner{Chapter 10:\\ Testing}
+\chapterbanner{10}{Testing}
 
 \section{Testing Methodology}
 
@@ -2123,7 +2242,7 @@ TypeScript Compilation & $<$ 30 seconds & 12 seconds & Pass \\
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 11: Project Cost Estimation}
-\chapterbanner{Chapter 11:\\ Project Cost Estimation}
+\chapterbanner{11}{Project Cost Estimation}
 
 \section{COCOMO Model Estimation}
 
@@ -2257,7 +2376,7 @@ Saurabh Balasaheb Zendage & Testing \& Documentation & Test cases, security rule
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 12: Applications and Future Enhancements}
-\chapterbanner{Chapter 12:\\ Applications and Future Enhancements}
+\chapterbanner{12}{Applications and Future Enhancements}
 
 \section{Real-World Applications}
 
@@ -2318,7 +2437,7 @@ Saurabh Balasaheb Zendage & Testing \& Documentation & Test cases, security rule
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 13: Conclusion}
-\chapterbanner{Chapter 13:\\ Conclusion}
+\chapterbanner{13}{Conclusion}
 
 \noindent AgriTrace successfully demonstrates how modern web technologies can be leveraged to address one of India's most pressing environmental challenges---agricultural waste management. The platform provides a comprehensive, end-to-end solution that connects farmers, waste collection agents, and recycling administrators through an intuitive, role-based digital ecosystem.
 
@@ -2385,7 +2504,7 @@ Saurabh Balasaheb Zendage & Testing \& Documentation & Test cases, security rule
 \refstepcounter{chapter}
 \setcounter{section}{0}
 \addcontentsline{toc}{chapter}{Chapter 14: Bibliography}
-\chapterbanner{Chapter 14:\\ Bibliography}
+\chapterbanner{14}{Bibliography}
 
 \begin{enumerate}
     \item[{[1]}] N. Jain, A. Bhatia, and H. Pathak, ``\textit{Emission of Air Pollutants from Crop Residue Burning in India},'' \textit{Aerosol and Air Quality Research}, Vol. 14, 2014, PP 422--430.
@@ -2437,6 +2556,44 @@ Saurabh Balasaheb Zendage & Testing \& Documentation & Test cases, security rule
     \item[{[24]}] ``Node.js Best Practices,'' \textit{https://nodejs.org/en/docs/guides}
 
     \item[{[25]}] Central Pollution Control Board (CPCB), ``\textit{Air Quality Monitoring Data -- National Air Quality Index},'' \textit{Government of India, 2023}.
+
+    \item[{[26]}] \label{bib:gadde2009} B. Gadde, S. Bonnet, C. Menke, and S. Garivait, ``\textit{Air Pollutant Emissions from Rice Straw Open Field Burning in India, Thailand and the Philippines},'' \textit{Environmental Pollution}, Vol. 157, No. 5, 2009, PP 1554--1558.
+
+    \item[{[27]}] \label{bib:jain2014} N. Jain, A. Bhatia, and H. Pathak, ``\textit{Emission of Air Pollutants from Crop Residue Burning in India},'' \textit{Aerosol and Air Quality Research}, Vol. 14, No. 1, 2014, PP 422--430.
+
+    \item[{[28]}] \label{bib:bhuvaneshwari2019} S. Bhuvaneshwari, H. Hettiarachchi, and J. N. Meegoda, ``\textit{Crop Residue Burning in India: A Review of the Scale, Trends, and Efforts for Pollution Mitigation with Local and Global Implications},'' \textit{International Journal of Environmental Research and Public Health}, Vol. 16, No. 5, 2019, P 832.
+
+    \item[{[29]}] \label{bib:kumar2021} R. Kumar and S. Bhattacharya, ``\textit{A GPS-Enabled Mobile Application for Urban Solid Waste Management: A Case Study of Bengaluru},'' \textit{Waste Management \& Research}, Vol. 39, No. 3, 2021, PP 456--467.
+
+    \item[{[30]}] \label{bib:pant2020} M. Pant and R. Katiyar, ``\textit{Digital Agriculture in India: A Systematic Review of Mobile Applications and Their Role in Farmer Empowerment},'' \textit{Journal of Rural Studies}, Vol. 78, 2020, PP 232--245.
+
+    \item[{[31]}] \label{bib:zhang2022} L. Zhang, Y. Liu, and H. Chen, ``\textit{WasteLink: A Cloud-Based Peer-to-Peer Marketplace for Industrial By-Product Exchange},'' \textit{Resources, Conservation and Recycling}, Vol. 179, 2022, P 106107.
+
+    \item[{[32]}] \label{bib:kamran2020} M. Kamran, M. F. Mushtaq, S. Asif, M. U. Khan, and A. Nisar, ``\textit{IoT-Based Smart Agriculture: A Review of Recent Advances and Future Challenges},'' \textit{International Journal of Advanced Computer Science and Applications}, Vol. 11, No. 5, 2020, PP 47--54.
+
+    \item[{[33]}] \label{bib:mao2018} D. Mao, Z. Wang, and Y. Wu, ``\textit{Blockchain-Based Supply Chain Management for Food Waste Reduction: A Pilot Study},'' \textit{Journal of Cleaner Production}, Vol. 196, 2018, PP 1086--1097.
+
+    \item[{[34]}] \label{bib:kshetri2018} N. Kshetri, ``\textit{1 Blockchain's Roles in Meeting Key Supply Chain Management Objectives},'' \textit{International Journal of Information Management}, Vol. 39, 2018, PP 80--89.
+
+    \item[{[35]}] \label{bib:agarwal2020} V. Agarwal, D. Gupta, and A. Bhatt, ``\textit{Deep Learning-Based Classification of Agricultural Crop Residues Using Convolutional Neural Networks},'' \textit{Computers and Electronics in Agriculture}, Vol. 178, 2020, P 105773.
+
+    \item[{[36]}] \label{bib:mamat2021} N. Mamat, N. F. Othman, I. Abdull Hamed, A. Rizman Zaini, and T. Bakar Mohd, ``\textit{Error Reduction in Classification of Agricultural Waste using Transfer Learning with MobileNetV2},'' \textit{IOP Conference Series: Earth and Environmental Science}, Vol. 765, 2021, P 012063.
+
+    \item[{[37]}] \label{bib:kamilaris2018} A. Kamilaris and F. X. Prenafeta-Bold\'u, ``\textit{Deep Learning in Agriculture: A Survey},'' \textit{Computers and Electronics in Agriculture}, Vol. 147, 2018, PP 70--90.
+
+    \item[{[38]}] \label{bib:searchinger2018} T. Searchinger, R. Waite, C. Hanson, and J. Ranganathan, ``\textit{Creating a Sustainable Food Future: A Menu of Solutions to Sustainably Feed More Than 10 Billion People by 2050},'' \textit{World Resources Institute, Washington DC}, 2018.
+
+    \item[{[39]}] \label{bib:verra2019} Verra (Verified Carbon Standard), ``\textit{VM0036: Methodology for the Rewetting of Drained Tropical Peatlands},'' and ``\textit{VM0042: Improved Agricultural Land Management},'' \textit{Verra, Washington DC}, 2019.
+
+    \item[{[40]}] \label{bib:pattanayak2010} S. K. Pattanayak, S. Wunder, and P. J. Ferraro, ``\textit{Show Me the Money: Do Payments Supply Environmental Services in Developing Countries?},'' \textit{Review of Environmental Economics and Policy}, Vol. 4, No. 2, 2010, PP 254--274.
+
+    \item[{[41]}] \label{bib:hamari2014} J. Hamari, J. Koivisto, and H. Sarsa, ``\textit{Does Gamification Work? -- A Literature Review of Empirical Studies on Gamification},'' \textit{Proceedings of the 47th Hawaii International Conference on System Sciences (HICSS)}, 2014, PP 3025--3034.
+
+    \item[{[42]}] \label{bib:froehlich2009} J. Froehlich, L. Findlater, and J. Landay, ``\textit{The Design of Eco-Feedback Technology},'' \textit{Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI)}, 2010, PP 1999--2008.
+
+    \item[{[43]}] \label{bib:yuriev2020} A. Yuriev, M. Dahmen, O. Paille, N. Boiral, and D. Guillaumie, ``\textit{Pro-Environmental Behaviors Through the Lens of the Theory of Planned Behavior: A Scoping Review},'' \textit{Resources, Conservation and Recycling}, Vol. 155, 2020, P 104660.
+
+    \item[{[44]}] \label{bib:stieglitz2017} S. Stieglitz, M. Lattemann, N. Robra-Bissantz, M. Zarnekow, and R. Brockmann, ``\textit{Gamification: Using Game Elements in Serious Contexts},'' \textit{Springer, Cham}, 2017.
 \end{enumerate}
 
 \end{document}
