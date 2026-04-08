@@ -92,3 +92,12 @@ ehthumbs.db
 .tmp
 .vercel
 .env*.local
+
+# ===== LATEX =====
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.auxlock
