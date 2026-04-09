@@ -1,279 +1,135 @@
-# 🌱 AgriTrace - Agricultural Waste Tracking & Recycling Platform
+# 🌱 AgriTrace - Sustainable Agricultural Waste Management
 
-A modern, full-stack web application for tracking agricultural waste and connecting farmers with recycling agents. Built with Next.js, Firebase, and AI-powered features.
+![AgriTrace Banner](./public/banner.png)
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Firebase](https://img.shields.io/badge/Firebase-Latest-orange?style=flat-square&logo=firebase)](https://firebase.google.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+A professional, full-stack platform designed to revolutionize agricultural waste tracking and recycling. AgriTrace connects farmers with recycling agents to reduce environmental impact and create a circular economy in agriculture.
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-agritrace--virid.vercel.app-emerald?style=for-the-badge&logo=vercel)](https://agri-trace-virid.vercel.app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 
 ---
 
 ## 📋 Table of Contents
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Project Structure](#-project-structure)
-- [Environment Variables](#-environment-variables)
-- [Security](#-security)
-- [Development](#-development)
-- [Deployment](#-deployment)
-- [Contributing](#-contributing)
+- [✨ Features](#-features)
+- [🛠 Tech Stack](#-tech-stack)
+- [🚀 Getting Started](#-getting-started)
+- [📁 Project Structure](#-project-structure)
+- [🔐 Security](#-security)
+- [🚢 Deployment](#-deployment)
+- [📝 Contributing](#-contributing)
+- [📄 License](#-license)
 
 ---
 
 ## ✨ Features
 
-### 🔑 Core Features
-- **User Authentication** - Firebase Auth with email/password and password reset
-- **Role-Based Access Control** - Farmer and Agent roles with Admin oversight
-- **Waste Tracking Dashboard** - Real-time waste reporting and tracking
-- **Collection Management** - Organize and manage waste collection
-- **Payment Integration** - Razorpay integration for transactions
+### 🔑 Core Capabilities
+- **Real-Time Tracking** - Monitor agricultural waste from reporting to recycling.
+- **Role-Based Workflows** - Dedicated interfaces for **Farmers**, **Recycling Agents**, and **Administrators**.
+- **Secure Payments** - Integrated **Razorpay** gateway for transparent transactions.
+- **AI-Powered Insights** - Integrated with **Google GenAI** for waste classification and optimization.
+- **Dynamic Dashboards** - Rich data visualization with Recharts for agents and admins.
 
-### 📊 User Dashboards
-- **Farmer Dashboard** - View and manage waste reports, track collection status
-- **Agent Dashboard** - Monitor collections, update waste status, view analytics
-- **Admin Dashboard** - Platform oversight, user management, system analytics
-
-### 🎨 UI/UX
-- **Modern, Responsive Design** - Works seamlessly on desktop, tablet, and mobile
-- **Beautiful Components** - Radix UI components with custom styling
-- **Smooth Animations** - Fluid interactions throughout
+### 🎨 Premium UI/UX
+- **Modern Dark/Light Themes** - Built with Tailwind CSS and Framer Motion.
+- **Responsive Layouts** - Seamless experience across mobile and desktop.
+- **Accessible Components** - Leveraging Radix UI for high-quality interactions.
 
 ---
 
 ## 🛠 Tech Stack
 
-### Frontend
-- **Framework:** Next.js 15.5 with App Router
-- **Language:** TypeScript 5.0
-- **Styling:** Tailwind CSS 3.0
-- **UI Components:** Radix UI
-- **Forms:** React Hook Form + Zod validation
-- **Icons:** Lucide React
-- **Charts:** Recharts
-
-### Backend & Services
-- **Runtime:** Node.js
-- **Database:** Firebase Firestore (NoSQL)
-- **Authentication:** Firebase Authentication
-- **File Storage:** Firebase Storage
-- **Payments:** Razorpay
-
-### DevOps & Tools
-- **Package Manager:** npm
-- **Linting:** ESLint + TypeScript
-- **Build Tool:** Turbopack
-- **Deployment:** Firebase Hosting / Vercel
+| Category | Technology |
+| :--- | :--- |
+| **Frontend** | [Next.js 15.5](https://nextjs.org/), [React 18](https://reactjs.org/), [Tailwind CSS](https://tailwindcss.com/) |
+| **Backend** | [Firebase Firestore](https://firebase.google.com/docs/firestore), [Firebase Auth](https://firebase.google.com/docs/auth) |
+| **Payments** | [Razorpay](https://razorpay.com/) |
+| **AI** | [Google GenKit](https://firebase.google.com/docs/genkit), [Google GenAI](https://ai.google.dev/) |
+| **Icons & UI** | [Lucide React](https://lucide.dev/), [Radix UI](https://www.radix-ui.com/) |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ and npm
-- Firebase project with Firestore and Authentication enabled
-- Razorpay API keys (for payments)
+- Node.js 18.17+
+- Firebase Project
+- Razorpay Account (API Keys)
 
-### Installation
-
-1. **Clone the repository**
+### Quick Start
+1. **Clone & Install**
    ```bash
-   git clone https://github.com/yourusername/agritrace.git
-   cd agritrace
-   ```
-
-2. **Install dependencies**
-   ```bash
+   git clone https://github.com/harsh-pandhe/AgriTrace.git
+   cd AgriTrace
    npm install
    ```
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-   Update `.env.local` with your Firebase and API credentials
+2. **Environment Setup**
+   Copy `.env.local.example` to `.env.local` and fill in your credentials.
 
-4. **Run the development server**
+3. **Development Mode**
    ```bash
    npm run dev
-   # Open http://localhost:9002 in your browser
    ```
-
-### Available Commands
-
-```bash
-# Development
-npm run dev              # Start dev server with Turbopack
-
-# Building
-npm run build           # Build for production
-npm start               # Start production server
-npm run lint            # Run ESLint
-npm run lint:fix        # Fix linting errors
-npm run typecheck       # Type check with TypeScript
-npm run check           # Run lint + typecheck
-```
 
 ---
 
 ## 📁 Project Structure
 
-```
-agritrace/
-├── src/
-│   ├── app/                      # Next.js App Router
-│   │   ├── api/                  # API routes (Razorpay, webhooks)
-│   │   ├── dashboard/            # Main dashboard (Farmer, Agent, Admin)
-│   │   ├── login/                # Login page
-│   │   ├── signup/               # Sign up page
-│   │   ├── role-selection/       # Role selection after signup
-│   │   └── layout.tsx            # Root layout
-│   ├── components/               # Reusable components
-│   │   ├── ui/                   # Base UI components (Radix)
-│   │   ├── dashboard/            # Dashboard components
-│   │   └── layout/               # Layout components (Header, Sidebar)
-│   ├── context/                  # React Context (Auth, etc.)
-│   ├── hooks/                    # Custom React hooks
-│   └── lib/                      # Utilities and helpers
-│       ├── firebase.ts           # Firebase config
-│       ├── firebase-service.ts   # Firebase service layer
-│       ├── types.ts              # TypeScript types
-│       └── utils.ts              # Helper functions
-├── public/                       # Static assets
-├── firestore.rules               # Firestore security rules
-├── firebase.json                 # Firebase configuration
-├── next.config.ts                # Next.js configuration
-├── tailwind.config.ts            # Tailwind CSS configuration
-├── tsconfig.json                 # TypeScript configuration
-└── package.json                  # Dependencies and scripts
-```
-
----
-
-## 🔐 Environment Variables
-
-### Required Variables
-
-```env
-# Firebase Configuration
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-
-# Razorpay
-NEXT_PUBLIC_RAZORPAY_KEY_ID=your_razorpay_key
-RAZORPAY_KEY_SECRET=your_razorpay_secret
-```
-
-**Important:** 
-- Keep server-only keys in `.env.local` (gitignored)
-- Use `NEXT_PUBLIC_` prefix only for safe, client-side values
-- Never commit `.env.local` to version control
-- Rotate keys immediately if accidentally exposed
-
----
-
-## 🔒 Security
-
-### Firestore Security Rules
-Access control is role-based with the following rules:
-
-- **`users/{uid}`** - Only owner and agents can read/update; deletion blocked
-- **`wasteReports/{id}`** - Created by authenticated farmers; readable by owner and agents; updates/deletes by agents only
-- **`listings/{id}`** - Authenticated users can read; owners manage their own
-
-### Best Practices
-- All user inputs are validated on client and server
-- TypeScript enforces type safety
-- ESLint catches potential security issues
-- Firebase rules restrict unauthorized access
-- Sensitive operations require authentication
-
-### Testing Security
 ```bash
-# Test Firestore rules locally
-firebase emulators:start
-
-# Type checking (catches many security issues)
-npm run typecheck
-
-# Lint for security issues
-npm run lint
+AgriTrace/
+├── src/
+│   ├── app/           # App Router & API routes
+│   ├── components/    # Reusable UI & Dashboard components
+│   ├── context/       # State management (Auth, Theme)
+│   ├── hooks/         # Custom React hooks
+│   └── lib/           # Services (Firebase, Razorpay)
+├── docs/              # Reports, Research & Installation guides
+├── public/            # Static assets (Banner, Favicon)
+├── scripts/           # Automation & Data processing scripts
+├── Project_Report/    # LaTeX Source for the project report
+├── firebase.json      # Firebase configuration
+└── package.json       # Metadata & Dependencies
 ```
+
+---
+
+## 🔐 Security
+
+AgriTrace implements industry-standard security practices:
+- **Role-Based Firestore Rules** - Strict validation for all database operations.
+- **Environment Isolation** - Sensitive keys are never exposed on the client-side.
+- **Input Validation** - Enforced by Zod schemas on both frontend and backend.
 
 ---
 
 ## 🚢 Deployment
 
-### Deploy to Firebase Hosting
+The platform is optimized for Vercel and Firebase Hosting.
+- Build command: `npm run build`
+- Output: `.next`
 
-```bash
-# Build the project
-npm run build
-
-# Deploy
-firebase deploy
-```
-
-### Deploy to Vercel
-
-```bash
-# Connect your GitHub repo to Vercel
-# Set environment variables in Vercel dashboard
-# Automatic deployments on push to main
-```
-
-### Pre-deployment Checklist
-- [ ] All environment variables configured
-- [ ] Firestore rules reviewed and tested
-- [ ] No console errors or warnings
-- [ ] Type checking passes: `npm run typecheck`
-- [ ] ESLint passes: `npm run lint`
-- [ ] Tested on multiple devices and browsers
+Ready to deploy? [Live Link](https://agri-trace-virid.vercel.app)
 
 ---
 
 ## 📝 Contributing
 
-1. Create a new branch for your feature: `git checkout -b feature/your-feature`
-2. Make your changes and commit: `git commit -am 'Add your feature'`
-3. Push to the branch: `git push origin feature/your-feature`
-4. Open a Pull Request
-
-**Code Style:**
-- Follow ESLint configuration
-- Use TypeScript for type safety
-- Write clear, descriptive commit messages
-- Add comments for complex logic
+Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines and our [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Distributed under the MIT License. See [LICENSE](./LICENSE) for more information.
 
 ---
 
-## 🤝 Support
+## 🤝 Contact
 
-For issues, feature requests, or questions:
-- Create an issue on GitHub
-- Check the [Implementation Status](./IMPLEMENTATION_STATUS.md) for known issues
-- See [Blueprint](./docs/blueprint.md) for architecture details
+**Harsh Pandhe** - [@harsh-pandhe](https://github.com/harsh-pandhe)
 
----
-
-## 🙏 Acknowledgments
-
-Built with:
-- [Next.js](https://nextjs.org/)
-- [Firebase](https://firebase.google.com/)
-- [Radix UI](https://www.radix-ui.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-
+Project Link: [https://github.com/harsh-pandhe/AgriTrace](https://github.com/harsh-pandhe/AgriTrace)

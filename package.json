@@ -1,6 +1,13 @@
 {
   "name": "agritrace",
   "version": "0.1.0",
+  "description": "A modern, full-stack web application for tracking agricultural waste and connecting farmers with recycling agents.",
+  "author": "Harsh Pandhe",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/harsh-pandhe/AgriTrace"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 3000",

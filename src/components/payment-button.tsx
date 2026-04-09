@@ -32,7 +32,7 @@ export default function PaymentButton({
     buyerId,
     sellerId,
     onSuccess,
-    onError: _onError,
+    onError,
     children,
     className,
     variant = 'default',
@@ -116,11 +116,13 @@ export default function PaymentButton({
                                 setStep('confirm');
                                 setLoading(false);
                                 toast({ title: 'Verification Failed', description: verifyData.error || 'Could not verify payment.', variant: 'destructive' });
+                                onError?.(verifyData.error || 'Verification Failed');
                             }
-                        } catch {
+                        } catch (err: unknown) {
                             setStep('confirm');
                             setLoading(false);
                             toast({ title: 'Payment Error', description: 'Something went wrong during verification.', variant: 'destructive' });
+                            onError?.(err);
                         }
                     },
                     modal: {
@@ -271,6 +273,9 @@ export default function PaymentButton({
                                         <p className="text-xs sm:text-sm text-slate-400 mt-1">
                                             <span style={{ fontFamily: 'Arial' }}>₹</span>{amount.toLocaleString()} paid successfully
                                         </p>
+                                        {showReceipt && (
+                                            <p className="text-[10px] text-emerald-400 mt-2 font-medium">Receipt generated and sent to your email</p>
+                                        )}
                                     </div>
                                 </div>
                             )}
