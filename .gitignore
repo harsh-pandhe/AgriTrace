@@ -101,3 +101,7 @@ ehthumbs.db
 *.lof
 *.lot
 *.auxlock
+
+# ===== PROJECT REPORTS =====
+/Project_Report/
+/docs/reports/
